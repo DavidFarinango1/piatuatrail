@@ -290,3 +290,4 @@ p { margin: 0 0 1em; }
   .hero__content { padding-right: calc(var(--vh) * 9 / 16 + 56px); }
   .hero__title { font-size: clamp(4rem, 8.5vw, 8rem); }
 }
+.center .btn { margin: .3rem; }
