@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Piatúa Ñampy Trail Running 2026 · El trail de la selva</title>
+  <meta name="description" content="Piatúa Ñampy Trail Running · 14 de noviembre de 2026 · Santa Clara, Pastaza, Ecuador. Rutas 14K Jaguar y 7K Armadillo junto al Río Piatúa. Organiza Kinesport Eventos." />
+  <meta property="og:title" content="Piatúa Ñampy Trail Running 2026" />
+  <meta property="og:description" content="El trail de la selva · 14 de noviembre de 2026 · Santa Clara, Pastaza. 14K Jaguar y 7K Armadillo." />
+  <meta property="og:image" content="https://www.piatuatrail.com/assets/img/hero.jpg" />
+  <meta property="og:url" content="https://www.piatuatrail.com/" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://www.piatuatrail.com/" />
+  <meta name="theme-color" content="#0d1f14" />
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+
+  <!-- ================= NAV ================= -->
+  <header class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="#inicio" class="nav__brand" aria-label="Inicio">
+        <span class="nav__logo">PIATÚA <b>ÑAMPY</b></span>
+        <small>Trail Running</small>
+      </a>
+      <button class="nav__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav__menu" id="navMenu">
+        <a href="#carrera">La carrera</a>
+        <a href="#rutas">Rutas</a>
+        <a href="#kit">Kit</a>
+        <a href="#categorias">Categorías</a>
+        <a href="#premios">Premios</a>
+        <a href="#ubicacion">Ubicación</a>
+        <a href="guia.html">Guía del corredor</a>
+        <a href="#inscripcion" class="btn btn--gold btn--sm">Inscríbete</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= HERO (VIDEO) ================= -->
+  <section class="hero" id="inicio">
+    <!-- Video publicitario de fondo. Coloca el archivo en assets/video/promo.mp4 -->
+    <video class="hero__video" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="assets/img/video-poster.jpg">
+      <source src="assets/video/promo.mp4" type="video/mp4" />
+    </video>
+    <div class="hero__shade"></div>
+
+    <div class="container hero__content">
+      <p class="hero__eyebrow">Primera edición · Amazonía ecuatoriana</p>
+      <h1 class="hero__title">Piatúa <span>Ñampy</span></h1>
+      <p class="hero__sub">Trail Running · <em>El trail de la selva</em></p>
+
+      <div class="hero__meta">
+        <div><strong>14 NOV 2026</strong><span>Sábado · 09h00</span></div>
+        <div><strong>SANTA CLARA</strong><span>Pastaza · Ecuador</span></div>
+        <div><strong>14K · 7K</strong><span>Jaguar $25 · Armadillo $20</span></div>
+      </div>
+
+      <div class="countdown" id="countdown" aria-label="Cuenta regresiva para la largada">
+        <div><b data-cd="d">--</b><span>Días</span></div>
+        <div><b data-cd="h">--</b><span>Horas</span></div>
+        <div><b data-cd="m">--</b><span>Min</span></div>
+        <div><b data-cd="s">--</b><span>Seg</span></div>
+      </div>
+
+      <div class="hero__cta">
+        <a href="#inscripcion" class="btn btn--gold">¡Inscríbete ya!</a>
+        <button class="btn btn--ghost" id="openVideo" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          Ver video
+        </button>
+      </div>
+    </div>
+
+    <button class="hero__sound" id="toggleSound" type="button" aria-label="Activar sonido">🔇</button>
+    <a href="#carrera" class="hero__scroll" aria-label="Bajar"><span></span></a>
+  </section>
+
+  <!-- ================= STRIP ================= -->
+  <div class="strip">
+    <div class="strip__track">
+      <span>Vive la aventura</span><i>✦</i><span>Río Piatúa</span><i>✦</i><span>Barro, agua y selva</span><i>✦</i><span>14K Jaguar</span><i>✦</i><span>7K Armadillo</span><i>✦</i>
+      <span>Vive la aventura</span><i>✦</i><span>Río Piatúa</span><i>✦</i><span>Barro, agua y selva</span><i>✦</i><span>14K Jaguar</span><i>✦</i><span>7K Armadillo</span><i>✦</i>
+    </div>
+  </div>
+
+  <!-- ================= LA CARRERA ================= -->
+  <section class="section" id="carrera">
+    <div class="container split">
+      <div class="split__text reveal">
+        <p class="kicker">Bienvenida</p>
+        <h2>No es solo una carrera.<br />Es la selva poniéndote a prueba.</h2>
+        <p>Bienvenido a la <strong>primera edición de Piatúa Ñampy Trail Running</strong>, una experiencia única que conecta el deporte con la majestuosidad de la Amazonía ecuatoriana. Un recorrido por caminos forestales al contorno del <strong>Río Piatúa</strong> que pondrá a prueba tu resistencia y te hará reencontrar el sentido de pertenencia a la naturaleza.</p>
+        <p>Santa Clara, en el centro-norte de Pastaza sobre la vía Puyo – Tena, es tierra de ríos cristalinos, cascadas, cavernas y clima cálido-húmedo. El escenario perfecto para correr entre barro, agua y vegetación tropical.</p>
+        <div class="itinerary">
+          <h3>Itinerario · 14 de noviembre de 2026</h3>
+          <ol>
+            <li><b>07h00</b><span>Concentración en el Balneario del Río Piatúa</span></li>
+            <li><b>09h00</b><span>Partida 14K · Jaguar</span></li>
+            <li><b>09h20</b><span>Partida 7K · Armadillo</span></li>
+            <li><b>12h00</b><span>Premiación</span></li>
+          </ol>
+        </div>
+      </div>
+      <figure class="split__media reveal">
+        <img src="assets/img/barro.jpg" alt="Zapatilla de trail salpicando barro en un sendero de la selva" loading="lazy" />
+        <figcaption>El trail de la selva</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= RUTAS ================= -->
+  <section class="section section--dark" id="rutas">
+    <div class="container">
+      <div class="section__head reveal">
+        <p class="kicker">Distancias</p>
+        <h2>Elige a tu animal</h2>
+        <p>Dos recorridos por senderos forestales junto al Río Piatúa. Cada distancia se identifica con un animal de la selva.</p>
+      </div>
+
+      <div class="routes">
+        <article class="route reveal" id="ruta-14k">
+          <header class="route__head">
+            <span class="route__badge">14K</span>
+            <div>
+              <h3>Ruta Jaguar</h3>
+              <p>Partida 09h00 · Hombres y Mujeres · desde 15 años</p>
+            </div>
+          </header>
+          <ul class="route__stats">
+            <li><b>~14 km</b><span>Distancia</span></li>
+            <li><b>~680 m</b><span>Altitud máx.</span></li>
+            <li><b>~560 m</b><span>Salida / meta</span></li>
+          </ul>
+          <p>Remonta el cañón del Piatúa por la orilla y senderos de bosque, con el punto más alto cerca del km 5,5 y un segundo repecho hacia el km 11.</p>
+          <figure class="route__img"><a href="assets/img/ruta-14k.jpg" target="_blank" title="Ver en grande"><img src="assets/img/ruta-14k.jpg" alt="Mapa GPS y altimetría de la ruta Jaguar 14K" loading="lazy" /></a></figure>
+          <a class="btn btn--line" href="#inscripcion" data-distance="14K Jaguar">Inscribirme en 14K</a>
+        </article>
+
+        <article class="route route--alt reveal" id="ruta-7k">
+          <header class="route__head">
+            <span class="route__badge">7K</span>
+            <div>
+              <h3>Ruta Armadillo</h3>
+              <p>Partida 09h20 · Hombres y Mujeres · desde 12 años</p>
+            </div>
+          </header>
+          <ul class="route__stats">
+            <li><b>~7 km</b><span>Distancia</span></li>
+            <li><b>~650 m</b><span>Altitud máx.</span></li>
+            <li><b>~565 m</b><span>Salida / meta</span></li>
+          </ul>
+          <p>Circuito que sigue el río y vuelve por camino forestal, con una subida progresiva hasta una meseta entre los km 4 y 5. Ideal para tu primer trail.</p>
+          <figure class="route__img"><a href="assets/img/ruta-7k.jpg" target="_blank" title="Ver en grande"><img src="assets/img/ruta-7k.jpg" alt="Mapa GPS y altimetría de la ruta Armadillo 7K" loading="lazy" /></a></figure>
+          <a class="btn btn--line" href="#inscripcion" data-distance="7K Armadillo">Inscribirme en 7K</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= KIT ================= -->
+  <section class="section" id="kit">
+    <div class="container split split--reverse">
+      <figure class="split__media split__media--plain reveal">
+        <img src="assets/img/camiseta.jpg" alt="Camiseta oficial verde de Piatúa Ñampy Trail Running" loading="lazy" />
+      </figure>
+      <div class="split__text reveal">
+        <p class="kicker">Con tu inscripción</p>
+        <h2>Tu kit de corredor</h2>
+        <ul class="checks">
+          <li>Dorsal (número)</li>
+          <li>Chip de cronometraje</li>
+          <li>Bolso</li>
+          <li>Camiseta oficial</li>
+          <li>Medalla finisher</li>
+          <li>Silbato de emergencia <small>Para identificar tu zona o emitir una alerta si pierdes la ruta o sufres un accidente.</small></li>
+          <li>Seguro de accidentes <small>Todo inscrito cuenta con seguro de Sweaden Seguros.</small></li>
+        </ul>
+        <h3 class="mini">Abastos en ruta</h3>
+        <p>Hidratación a mitad del recorrido, agua y fruta. Medalla finisher para quienes completen el recorrido.</p>
+        <div class="pickup">
+          <h3>Entrega de kits</h3>
+          <ul>
+            <li><b>Viernes 13 de noviembre</b> · GAD Municipal de Santa Clara · 13h00 a 18h00</li>
+            <li><b>Sábado 14 de noviembre</b> (día del evento) · 06h00 a 08h00 · exclusivo para participantes de fuera de la provincia</li>
+          </ul>
+        </div>
+        <p class="note">El kit se entrega presentando el documento de identidad. Si lo retira una tercera persona, debe presentar copia de la cédula del participante y una autorización firmada.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CATEGORÍAS ================= -->
+  <section class="section section--moss" id="categorias">
+    <div class="container">
+      <div class="section__head reveal">
+        <p class="kicker">Hombres y Mujeres</p>
+        <h2>Categorías</h2>
+      </div>
+      <div class="cats reveal">
+        <table>
+          <thead><tr><th>Categoría</th><th>14K Jaguar</th><th>7K Armadillo</th></tr></thead>
+          <tbody>
+            <tr><td>Juvenil</td><td>15 – 19</td><td>12 – 19</td></tr>
+            <tr><td>Senior</td><td>20 – 29</td><td>20 – 29</td></tr>
+            <tr><td>Máster A</td><td>30 – 39</td><td>30 – 39</td></tr>
+            <tr><td>Máster B</td><td>40 – 49</td><td>40 – 49</td></tr>
+            <tr><td>Supermáster</td><td>50 en adelante</td><td>50 en adelante</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Si una categoría no alcanza un mínimo de 30 participantes, la organización podrá unir a sus competidores con otra categoría similar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PREMIOS ================= -->
+  <section class="section" id="premios">
+    <div class="container">
+      <div class="section__head reveal">
+        <p class="kicker">Ganadores generales</p>
+        <h2>Tabla de premios</h2>
+        <p>$100 en efectivo para el primer lugar general masculino y femenino de cada distancia. Premiación a las 12h00.</p>
+      </div>
+      <div class="prizes reveal">
+        <article class="prize">
+          <h3>7K Armadillo</h3>
+          <ul>
+            <li><span>General masculino</span><b>$100</b></li>
+            <li><span>General femenino</span><b>$100</b></li>
+          </ul>
+        </article>
+        <article class="prize prize--14k">
+          <h3>14K Jaguar</h3>
+          <ul>
+            <li><span>General masculino</span><b>$100</b></li>
+            <li><span>General femenino</span><b>$100</b></li>
+          </ul>
+        </article>
+      </div>
+      <figure class="prizes__img reveal">
+        <img src="assets/img/premios.jpg" alt="Afiche: tabla de premios para ganadores generales, $100 por categoría en 7K y 14K" loading="lazy" />
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= INSCRIPCIÓN ================= -->
+  <section class="section section--dark" id="inscripcion">
+    <div class="container">
+      <div class="section__head reveal">
+        <p class="kicker">Inscripciones abiertas</p>
+        <h2>Inscríbete en 3 pasos</h2>
+        <p>Paga, envía tu comprobante con tus datos y recibe la confirmación de tu cupo por correo o WhatsApp.</p>
+        <p class="deadline">Cierre de inscripciones: jueves 12 de noviembre de 2026</p>
+      </div>
+
+      <ol class="steps reveal">
+        <li>
+          <span>1</span>
+          <h3>Realiza el pago</h3>
+          <p>Escanea el QR con <b>Deuna</b> o la app de <b>Banco Pichincha</b>, ingresa el valor de tu distancia y paga.</p>
+        </li>
+        <li>
+          <span>2</span>
+          <h3>Envía comprobante y datos</h3>
+          <p>Completa el formulario de abajo y envíalo por <b>WhatsApp</b> o <b>correo</b> adjuntando la foto del comprobante.</p>
+        </li>
+        <li>
+          <span>3</span>
+          <h3>Recibe tu confirmación</h3>
+          <p>La organización valida tu pago y te envía el mensaje <b>"¡Inscripción confirmada!"</b> con los horarios de entrega de kits. Guárdalo para el retiro.</p>
+        </li>
+      </ol>
+
+      <div class="register">
+        <!-- Pago -->
+        <aside class="pay reveal">
+          <h3>Datos para el pago</h3>
+          <div class="prices">
+            <div><span>14K Jaguar</span><b data-price="14K">$25</b></div>
+            <div><span>7K Armadillo</span><b data-price="7K">$20</b></div>
+          </div>
+          <p class="note">Incluye: camiseta, medalla, bolso, chip y dorsal. Inscripciones hasta el 12 de noviembre.</p>
+          <figure class="qr">
+            <img src="assets/img/qr-pichincha.png" alt="Código QR de pago Deuna / Banco Pichincha" loading="lazy" onerror="this.closest('.qr').classList.add('qr--missing')" />
+            <figcaption>Paga con <b>Deuna</b> o <b>Banco Pichincha</b></figcaption>
+          </figure>
+          <ol class="qr-steps">
+            <li>Escoge la opción <b>pagar a QR</b></li>
+            <li><b>Escanea</b> el código</li>
+            <li><b>Ingresa</b> el monto, paga y ¡listo!</li>
+          </ol>
+          <p class="note">La inscripción y el dorsal son personales e intransferibles. Una vez confirmada, no hay devoluciones ni cambios de participante o distancia, salvo decisión excepcional de la organización.</p>
+        </aside>
+
+        <!-- Formulario -->
+        <form class="form reveal" id="regForm" novalidate>
+          <h3>Ficha de inscripción</h3>
+          <div class="form__grid">
+            <label class="span-2">Nombres y apellidos *<input name="nombre" required autocomplete="name" /></label>
+            <label>Cédula / Pasaporte *<input name="cedula" required inputmode="numeric" /></label>
+            <label>Fecha de nacimiento *<input name="nacimiento" type="date" required /></label>
+            <label>Sexo *
+              <select name="sexo" required>
+                <option value="">Selecciona</option><option>Mujer</option><option>Hombre</option>
+              </select>
+            </label>
+            <label>Distancia *
+              <select name="distancia" id="distancia" required>
+                <option value="">Selecciona</option><option>14K Jaguar</option><option>7K Armadillo</option>
+              </select>
+            </label>
+            <label>Talla de camiseta *
+              <select name="talla" required>
+                <option value="">Selecciona</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+              </select>
+            </label>
+            <label>Categoría (automática)<input name="categoria" id="categoria" readonly placeholder="Según edad y distancia" /></label>
+            <label>Celular *<input name="celular" type="tel" required autocomplete="tel" /></label>
+            <label>Correo *<input name="correo" type="email" required autocomplete="email" /></label>
+            <label>Ciudad / Club<input name="club" /></label>
+            <label>Tipo de sangre<input name="sangre" placeholder="Ej. O+" /></label>
+            <label class="span-2">Contacto de emergencia (nombre y teléfono) *<input name="emergencia" required /></label>
+            <label class="check span-2"><input type="checkbox" name="acepto" required /> <span>Acepto el reglamento y la <a href="guia.html" target="_blank">Guía del Corredor</a>, y declaro estar en condiciones físicas para participar.</span></label>
+          </div>
+          <p class="form__error" id="formError" role="alert"></p>
+          <div class="form__actions">
+            <button type="submit" class="btn btn--wa" data-channel="wa">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>
+              Enviar por WhatsApp
+            </button>
+            <button type="submit" class="btn btn--line" data-channel="mail">Enviar por correo</button>
+          </div>
+          <p class="note">Al enviar se abrirá WhatsApp o tu correo con tus datos listos. <b>Adjunta la foto del comprobante de pago</b> antes de enviar.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REGLAS ================= -->
+  <section class="section" id="reglas">
+    <div class="container">
+      <div class="section__head reveal">
+        <p class="kicker">Seguridad, salud e higiene</p>
+        <h2>Corre con respeto por la selva</h2>
+      </div>
+      <div class="rules">
+        <div class="rule reveal">
+          <h3>✔ Material obligatorio</h3>
+          <ul><li>Calzado adecuado para trail</li><li>Gafas para protección visual</li></ul>
+        </div>
+        <div class="rule rule--no reveal">
+          <h3>✖ Prohibido</h3>
+          <ul><li>Bastones / trekking poles</li><li>Correr con mascotas</li><li>Pacers o liebres</li></ul>
+        </div>
+        <div class="rule reveal">
+          <h3>✚ Salud</h3>
+          <ul><li>Rutas señalizadas con cintas y elementos visibles</li><li>El director de carrera o el equipo médico podrá retirar a quien esté en riesgo</li><li>Seguro Sweaden Seguros para todo inscrito</li></ul>
+        </div>
+        <div class="rule rule--no reveal">
+          <h3>♻ Higiene</h3>
+          <ul><li>Arrojar basura, dañar la flora o molestar a la fauna silvestre ocasiona descalificación inmediata</li></ul>
+        </div>
+      </div>
+      <p class="center reveal"><a href="guia.html" class="btn btn--line">Leer la Guía del Corredor completa</a></p>
+    </div>
+  </section>
+
+  <!-- ================= UBICACIÓN ================= -->
+  <section class="section section--dark" id="ubicacion">
+    <div class="container split">
+      <div class="split__text reveal">
+        <p class="kicker">Punto de encuentro</p>
+        <h2>Balneario del Río Piatúa</h2>
+        <p>Cantón Santa Clara · Provincia de Pastaza · Vía Puyo – Tena (E45).</p>
+        <h3 class="mini">Desde Quito</h3>
+        <p>Troncal de la Sierra al sur hasta Ambato; de ahí vía Pelileo – Baños de Agua Santa hasta Puyo. Toma la E45 (vía Puyo – Tena) al norte: Santa Clara está a 40 minutos por vía asfaltada.</p>
+        <h3 class="mini">Desde Macas</h3>
+        <p>Troncal Amazónica al norte por Sucúa y Chupianza hasta Puyo. Toma el paso lateral hacia la E45 (vía Puyo – Tena): Santa Clara está a 40 minutos.</p>
+        <a class="btn btn--gold" href="https://maps.app.goo.gl/zHKp6xKUrxJX2FKEA" target="_blank" rel="noopener">Abrir en Google Maps</a>
+      </div>
+      <div class="map reveal">
+        <iframe title="Mapa: Balneario Piatúa, Santa Clara" src="https://www.google.com/maps?q=Balneario+Piatua,+Q446%2B45+Santa+Clara,+Pastaza,+Ecuador&z=14&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACTO / FOOTER ================= -->
+  <footer class="footer" id="contacto">
+    <div class="container footer__grid">
+      <div>
+        <p class="footer__logo">PIATÚA <b>ÑAMPY</b></p>
+        <p>Trail Running · El trail de la selva<br />14 de noviembre de 2026 · Santa Clara, Pastaza</p>
+        <p class="footer__org">Organiza: <b>Kinesport Eventos</b></p>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="https://wa.me/593991570800" target="_blank" rel="noopener">WhatsApp +593 99 157 0800</a></li>
+          <li><a href="mailto:kinesportssas@gmail.com">kinesportssas@gmail.com</a></li>
+          <li><a href="mailto:quinesclub@gmail.com">quinesclub@gmail.com</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Información</h4>
+        <ul>
+          <li><a href="#rutas">Rutas 14K y 7K</a></li>
+          <li><a href="#inscripcion">Inscripción</a></li>
+          <li><a href="#premios">Premios</a></li>
+          <li><a href="guia.html">Guía del corredor</a></li>
+          <li><a href="#ubicacion">Cómo llegar</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer__copy">© 2026 Piatúa Ñampy Trail Running · Kinesport Eventos</p>
+  </footer>
+
+  <!-- WhatsApp flotante -->
+  <a class="wa-float" href="https://wa.me/593991570800?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Piat%C3%BAa%20%C3%91ampy%20Trail%20Running" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>
+  </a>
+
+  <!-- Modal de video con sonido -->
+  <div class="modal" id="videoModal" aria-hidden="true" role="dialog" aria-label="Video promocional">
+    <button class="modal__close" id="closeVideo" type="button" aria-label="Cerrar">✕</button>
+    <video id="modalVideo" controls playsinline preload="none" poster="assets/img/video-poster.jpg">
+      <source src="assets/video/promo.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
