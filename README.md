@@ -51,3 +51,9 @@ Borrar los registros de "parking" (CNAME `www` → parkingpage.namecheap.com y U
 | CNAME | www | davidfarinango1.github.io. |
 
 Cuando el dominio responda, activar en GitHub → Settings → Pages → **Enforce HTTPS**.
+
+## Publicación (Firebase Hosting)
+
+- Proyecto Firebase: `piatuatrail-web` (cuenta weygo.ceo@gmail.com). URL: https://piatuatrail-web.web.app
+- Para actualizar: `firebase deploy --only hosting` en esta carpeta. `firebase.json` excluye `_originales/`, `README.md` y archivos internos.
+- El dominio `www.piatuatrail.com` apunta hoy a GitHub Pages. Un dominio solo puede apuntar a uno de los dos.
