@@ -32,28 +32,25 @@ ffmpeg -i _originales/promo-original.mp4 -vf scale=720:-2 -c:v libx264 -crf 27 -
 - Dominio: `www.piatuatrail.com` (usado en `og:url`, `canonical` y en el mensaje de confirmación).
 - WhatsApp y correos: al inicio de `assets/js/main.js` (`WHATSAPP`, `EMAILS`) y en los enlaces del pie de página.
 
-## Publicación (GitHub Pages)
+## Publicación
 
-- Repositorio: https://github.com/DavidFarinango1/piatuatrail (rama `main`, carpeta raíz). El archivo `CNAME` fija el dominio `www.piatuatrail.com`.
-- Para actualizar la web: guardar cambios y ejecutar en esta carpeta `git add -A && git commit -m "cambio" && git push`. GitHub publica en 1–2 minutos.
-- `_originales/` no se sube (está en `.gitignore`).
+### Principal: Firebase Hosting → www.piatuatrail.com
 
-### DNS en Namecheap (Domain List → piatuatrail.com → Advanced DNS)
+- Proyecto Firebase: `piatuatrail-web` (cuenta weygo.ceo@gmail.com). URL interna: https://piatuatrail-web.web.app
+- Para actualizar la web: `firebase deploy --only hosting` en esta carpeta. `firebase.json` excluye `_originales/`, `README.md` y archivos internos.
+- `piatuatrail.com` (sin www) redirige a `www.piatuatrail.com`.
 
-Borrar los registros de "parking" (CNAME `www` → parkingpage.namecheap.com y URL Redirect de `@`) y crear:
+DNS en Namecheap (Domain List → piatuatrail.com → Advanced DNS):
 
 | Tipo | Host | Valor |
 |---|---|---|
-| A | @ | 185.199.108.153 |
-| A | @ | 185.199.109.153 |
-| A | @ | 185.199.110.153 |
-| A | @ | 185.199.111.153 |
-| CNAME | www | davidfarinango1.github.io. |
+| A | @ | 199.36.158.100 |
+| CNAME | www | piatuatrail-web.web.app. |
+| TXT | @ | hosting-site=piatuatrail-web |
+| TXT | @ | v=spf1 include:spf.efwd.registrar-servers.com ~all (de Namecheap, no borrar) |
 
-Cuando el dominio responda, activar en GitHub → Settings → Pages → **Enforce HTTPS**.
+### Respaldo: GitHub Pages
 
-## Publicación (Firebase Hosting)
-
-- Proyecto Firebase: `piatuatrail-web` (cuenta weygo.ceo@gmail.com). URL: https://piatuatrail-web.web.app
-- Para actualizar: `firebase deploy --only hosting` en esta carpeta. `firebase.json` excluye `_originales/`, `README.md` y archivos internos.
-- El dominio `www.piatuatrail.com` apunta hoy a GitHub Pages. Un dominio solo puede apuntar a uno de los dos.
+- Repositorio: https://github.com/DavidFarinango1/piatuatrail → https://davidfarinango1.github.io/piatuatrail/ (sin dominio propio).
+- Para actualizarlo: `git add -A && git commit -m "cambio" && git push`.
+- `_originales/` no se sube (está en `.gitignore`).
