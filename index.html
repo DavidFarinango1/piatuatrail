@@ -45,8 +45,10 @@
 
   <!-- ================= HERO (VIDEO) ================= -->
   <section class="hero" id="inicio">
-    <!-- Video publicitario de fondo. Coloca el archivo en assets/video/promo.mp4 -->
+    <!-- Video publicitario de fondo -->
     <video class="hero__video" id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="assets/img/video-poster.jpg">
+      <!-- El vídeo se sirve desde GitHub Pages para no consumir la cuota diaria gratuita de Firebase; la copia local es respaldo -->
+      <source src="https://davidfarinango1.github.io/piatuatrail/assets/video/promo.mp4" type="video/mp4" />
       <source src="assets/video/promo.mp4" type="video/mp4" />
     </video>
     <div class="hero__shade"></div>
@@ -429,6 +431,8 @@
   <div class="modal" id="videoModal" aria-hidden="true" role="dialog" aria-label="Video promocional">
     <button class="modal__close" id="closeVideo" type="button" aria-label="Cerrar">✕</button>
     <video id="modalVideo" controls playsinline preload="none" poster="assets/img/video-poster.jpg">
+      <!-- El vídeo se sirve desde GitHub Pages para no consumir la cuota diaria gratuita de Firebase; la copia local es respaldo -->
+      <source src="https://davidfarinango1.github.io/piatuatrail/assets/video/promo.mp4" type="video/mp4" />
       <source src="assets/video/promo.mp4" type="video/mp4" />
     </video>
   </div>
