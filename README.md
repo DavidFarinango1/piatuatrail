@@ -32,12 +32,22 @@ ffmpeg -i _originales/promo-original.mp4 -vf scale=720:-2 -c:v libx264 -crf 27 -
 - Dominio: `www.piatuatrail.com` (usado en `og:url`, `canonical` y en el mensaje de confirmación).
 - WhatsApp y correos: al inicio de `assets/js/main.js` (`WHATSAPP`, `EMAILS`) y en los enlaces del pie de página.
 
-## Publicar y vincular el dominio
+## Publicación (GitHub Pages)
 
-**Opción A — Netlify (gratis):** app.netlify.com → *Add new site* → *Deploy manually* → arrastrar esta carpeta. Luego *Domain management* → *Add a domain* y en el proveedor del dominio crear:
-- `A` `@` → `75.2.60.5`
-- `CNAME` `www` → `<tu-sitio>.netlify.app`
+- Repositorio: https://github.com/DavidFarinango1/piatuatrail (rama `main`, carpeta raíz). El archivo `CNAME` fija el dominio `www.piatuatrail.com`.
+- Para actualizar la web: guardar cambios y ejecutar en esta carpeta `git add -A && git commit -m "cambio" && git push`. GitHub publica en 1–2 minutos.
+- `_originales/` no se sube (está en `.gitignore`).
 
-**Opción B — Hosting con cPanel (Hostinger, etc.):** subir todo el contenido de la carpeta a `public_html/` con el administrador de archivos o FTP. El dominio queda vinculado si sus DNS apuntan a ese hosting.
+### DNS en Namecheap (Domain List → piatuatrail.com → Advanced DNS)
 
-En ambos casos activar HTTPS (SSL gratuito incluido).
+Borrar los registros de "parking" (CNAME `www` → parkingpage.namecheap.com y URL Redirect de `@`) y crear:
+
+| Tipo | Host | Valor |
+|---|---|---|
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| CNAME | www | davidfarinango1.github.io. |
+
+Cuando el dominio responda, activar en GitHub → Settings → Pages → **Enforce HTTPS**.
