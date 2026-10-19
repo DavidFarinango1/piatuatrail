@@ -232,6 +232,17 @@
 
       var fb = await import(FIREBASE_URL);
       var c = await fb.loadFirebase();
+      data.cedulaKey = fb.cedulaKey(data.cedula);
+
+      // Evita inscripciones duplicadas: si la cédula ya está pendiente o aprobada, no se envía otra vez
+      var verifRef = c.fs.doc(c.db, 'verificacion', data.cedulaKey);
+      var prev = await c.fs.getDoc(verifRef);
+      if (prev.exists() && prev.data().estado !== 'rechazada') {
+        var p = prev.data();
+        throw new Error('DUP:Ya existe una inscripción con esta cédula (' + p.codigo + ', ' +
+          (p.estado === 'aprobada' ? 'aprobada' : 'en revisión') + '). Consulta su estado en la sección Verificar o escríbenos al WhatsApp +593 99 157 0800.');
+      }
+
       var ref = c.fs.doc(c.fs.collection(c.db, 'inscripciones'));
       data.codigo = 'PN-' + ref.id.slice(0, 6).toUpperCase();
       data.estado = 'pendiente';
@@ -240,6 +251,8 @@
       var batch = c.fs.writeBatch(c.db);
       batch.set(ref, data);
       batch.set(c.fs.doc(c.db, 'comprobantes', ref.id), { imagen: imagen, creado: c.fs.serverTimestamp() });
+      batch.set(verifRef, { ref: ref.id, codigo: data.codigo, nombre: fb.shortName(data.nombre), distancia: data.distancia,
+        estado: 'pendiente', actualizado: c.fs.serverTimestamp() });
       await batch.commit();
 
       done.querySelectorAll('[data-done]').forEach(function (el) { el.textContent = data[el.getAttribute('data-done')]; });
@@ -248,7 +261,9 @@
       done.classList.add('is-in');
       done.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (err) {
-      errorBox.textContent = err && err.message && err.message.indexOf('comprobante') > -1 ? err.message
+      var m = (err && err.message) || '';
+      errorBox.textContent = m.indexOf('DUP:') === 0 ? m.slice(4)
+        : m.indexOf('comprobante') > -1 ? m
         : 'No se pudo enviar la inscripción. Revisa tu conexión e inténtalo de nuevo. Si persiste, escríbenos al WhatsApp +593 99 157 0800.';
       if (window.console) console.error(err);
     } finally {

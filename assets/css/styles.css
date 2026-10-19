@@ -300,3 +300,13 @@ p { margin: 0 0 1em; }
 .form--done h3 { color: var(--leaf); }
 .form--done .code { font-family: var(--head); font-size: 1.5rem; letter-spacing: .08em; color: var(--mud); }
 .form button[disabled] { opacity: .6; cursor: wait; }
+
+/* Menú: con 10 enlaces pasa a botón hamburguesa antes de que el texto se parta */
+.nav__menu a { white-space: nowrap; }
+@media (max-width: 1180px) {
+  .nav__toggle { display: block; }
+  .nav__menu { position: fixed; inset: 72px 0 auto; flex-direction: column; align-items: stretch; gap: 0; padding: 1rem 16px 1.5rem; background: rgba(13, 31, 20, .98); transform: translateY(-120%); transition: transform .35s; }
+  .nav__menu.is-open { transform: none; }
+  .nav__menu a:not(.btn) { padding: .9rem 0; border-bottom: 1px solid var(--line); }
+  .nav__menu .btn { margin-top: 1rem; }
+}

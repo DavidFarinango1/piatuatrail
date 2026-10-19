@@ -74,6 +74,15 @@
             "value": "no-cache"
           }
         ]
+      },
+      {
+        "source": "/verificar",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ]
   },

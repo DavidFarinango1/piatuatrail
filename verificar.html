@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verifica tu inscripción · Piatúa Ñampy Trail Running 2026</title>
+  <meta name="description" content="Consulta con tu número de cédula si tu inscripción a Piatúa Ñampy Trail Running 2026 ya fue aprobada." />
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root { --jungle:#0d1f14; --moss:#1f4d2e; --leaf:#2f7a46; --gold:#d9a93b; --gold-2:#f0c75e; --mud:#7a4e2d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font: 16px/1.55 'Inter', system-ui, sans-serif; color: #fff;
+      background: linear-gradient(135deg, #0a1a10 0%, #143a24 45%, #3a3a22 75%, #6b4419 100%) fixed; }
+    a { color: inherit; }
+    .wrap { width: min(1000px, 100% - 32px); margin: 0 auto; padding: 28px 0 60px; }
+    .back { display: inline-flex; align-items: center; gap: .55rem; font-family: 'Bebas Neue', Impact, sans-serif; font-size: 1.35rem; letter-spacing: .03em; text-decoration: none; }
+    .back b { color: var(--gold); font-weight: 400; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; margin-top: 64px; }
+    .badge { display: inline-flex; align-items: center; gap: .55rem; padding: .4rem 1rem; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
+      font-size: .74rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 3px rgba(61,220,132,.2); }
+    h1 { font-family: 'Bebas Neue', Impact, sans-serif; font-weight: 400; font-size: clamp(3.2rem, 7vw, 4.6rem); line-height: .95; letter-spacing: .01em; margin: 1.1rem 0 1rem; }
+    h1 span { display: block; color: var(--gold); }
+    .lead { font-size: 1.1rem; color: rgba(255,255,255,.82); max-width: 30ch; }
+    .card { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); border-radius: 22px; padding: 30px; backdrop-filter: blur(10px); box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+    .card__head { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+    .card__icon { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.1); color: var(--gold); }
+    .card__head b { display: block; font-size: 1.15rem; }
+    .card__head small { color: rgba(255,255,255,.7); font-size: .88rem; }
+    label { display: block; font-size: .74rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: .5rem; }
+    input { width: 100%; font: 500 1.05rem 'Inter', sans-serif; color: #fff; padding: 1rem 1.1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.1); }
+    input::placeholder { color: rgba(255,255,255,.5); }
+    input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,169,59,.25); }
+    .btn { width: 100%; margin-top: 18px; display: inline-flex; align-items: center; justify-content: center; gap: .6rem; padding: 1rem; border: 0; border-radius: 12px; cursor: pointer;
+      font: 800 1rem 'Inter', sans-serif; letter-spacing: .03em; text-transform: uppercase; color: var(--jungle); background: linear-gradient(90deg, var(--gold-2), var(--gold)); }
+    .btn[disabled] { opacity: .65; cursor: wait; }
+    .help { text-align: center; font-size: .9rem; color: rgba(255,255,255,.75); margin: 18px 0 0; }
+    .help a { font-weight: 700; color: #fff; }
+    /* Resultado */
+    .result { margin-top: 20px; border-radius: 14px; padding: 18px; border: 1px solid; }
+    .result h2 { font-family: 'Bebas Neue', Impact, sans-serif; font-weight: 400; font-size: 1.7rem; letter-spacing: .03em; margin: 0 0 .3rem; }
+    .result p { margin: .3rem 0; font-size: .95rem; }
+    .result dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 12px 0 4px; font-size: .95rem; }
+    .result dt { color: rgba(255,255,255,.7); }
+    .result dd { margin: 0; font-weight: 700; }
+    .result.aprobada { background: rgba(61,220,132,.12); border-color: rgba(61,220,132,.5); }
+    .result.aprobada h2 { color: #6ff0a6; }
+    .result.pendiente { background: rgba(240,199,94,.12); border-color: rgba(240,199,94,.5); }
+    .result.pendiente h2 { color: var(--gold-2); }
+    .result.rechazada, .result.nada { background: rgba(255,120,100,.1); border-color: rgba(255,120,100,.45); }
+    .result.rechazada h2, .result.nada h2 { color: #ff9a86; }
+    .result a.link { font-weight: 700; }
+    [hidden] { display: none !important; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; gap: 28px; margin-top: 36px; } .lead { max-width: none; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+      Piatúa <b>Ñampy</b> 2026
+    </a>
+
+    <div class="grid">
+      <div>
+        <span class="badge">Sistema de verificación 2026</span>
+        <h1>Verifica tu <span>inscripción</span></h1>
+        <p class="lead">Ingresa tu número de cédula para consultar si tu inscripción ya fue aprobada.</p>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <span class="card__icon"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V6h16zM6 15h6v-1.2c0-1.3-2-2-3-2s-3 .7-3 2zm3-4a1.6 1.6 0 1 0 0-3.2A1.6 1.6 0 0 0 9 11zm5-3h4v1.5h-4zm0 3h4v1.5h-4z"/></svg></span>
+          <div><b>Consultar cédula</b><small>Ingresa tus datos para validar</small></div>
+        </div>
+        <form id="verifForm" novalidate>
+          <label for="cedula">Número de identificación</label>
+          <input id="cedula" name="cedula" inputmode="text" autocomplete="off" placeholder="Ej: 1601234567" required />
+          <button class="btn" id="verifBtn" type="submit">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.2 10.4l5.4 5.4-1.4 1.4-5.4-5.4A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
+            Consultar inscripción
+          </button>
+        </form>
+        <div class="result" id="result" role="status" aria-live="polite" hidden></div>
+        <p class="help">¿Tienes problemas? <a href="https://wa.me/593991570800" target="_blank" rel="noopener">Contáctanos</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { loadFirebase, cedulaKey } from './assets/js/firebase.js';
+
+    const form = document.getElementById('verifForm');
+    const input = document.getElementById('cedula');
+    const btn = document.getElementById('verifBtn');
+    const out = document.getElementById('result');
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function show(kind, html) {
+      out.className = 'result ' + kind;
+      out.innerHTML = html;
+      out.hidden = false;
+    }
+
+    const details = (d) => `<dl><dt>Participante</dt><dd>${esc(d.nombre)}</dd><dt>Código</dt><dd>${esc(d.codigo)}</dd><dt>Distancia</dt><dd>${esc(d.distancia)}</dd></dl>`;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const key = cedulaKey(input.value);
+      if (key.length < 5) { show('nada', '<p>Escribe tu número de cédula o pasaporte completo.</p>'); input.focus(); return; }
+      btn.disabled = true;
+      try {
+        const { db, fs } = await loadFirebase();
+        const snap = await fs.getDoc(fs.doc(db, 'verificacion', key));
+        if (!snap.exists()) {
+          show('nada', `<h2>Sin resultados</h2><p>No encontramos una inscripción con esa cédula.</p>
+            <p>Verifica el número, o si aún no te has inscrito, <a class="link" href="index.html#inscripcion">hazlo aquí</a>.</p>`);
+          return;
+        }
+        const d = snap.data();
+        if (d.estado === 'aprobada') {
+          show('aprobada', `<h2>✓ Inscripción aprobada</h2>${details(d)}
+            <p>¡Nos vemos el sábado 14 de noviembre! Revisa la <a class="link" href="guia.html">Guía del Corredor</a> para la entrega de kits y horarios.</p>`);
+        } else if (d.estado === 'rechazada') {
+          show('rechazada', `<h2>Inscripción no validada</h2>${details(d)}
+            <p>No pudimos validar tu comprobante. Revisa el mensaje que te enviamos por WhatsApp o correo, o <a class="link" href="https://wa.me/593991570800" target="_blank" rel="noopener">escríbenos</a>. Puedes volver a <a class="link" href="index.html#inscripcion">enviar la ficha</a>.</p>`);
+        } else {
+          show('pendiente', `<h2>En revisión</h2>${details(d)}
+            <p>Recibimos tu ficha y la organización está validando tu comprobante. Te confirmaremos por WhatsApp y correo.</p>`);
+        }
+      } catch (err) {
+        show('nada', '<p>No se pudo consultar en este momento. Revisa tu conexión e inténtalo de nuevo.</p>');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

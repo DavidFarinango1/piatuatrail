@@ -1,4 +1,4 @@
-import { loadAuth, ADMINS } from './firebase.js';
+import { loadAuth, ADMINS, cedulaKey, shortName } from './firebase.js';
 
 const PRICES = { '14K Jaguar': 25, '7K Armadillo': 20 };
 
@@ -147,6 +147,7 @@ authMod.onAuthStateChanged(auth, (u) => {
   $('loginView').hidden = !!u;
   $('appView').hidden = !u;
   $('who').hidden = !u;
+  $('topBar').hidden = !u;
   if (!u) return;
   $('whoEmail').textContent = u.email;
   listen();
@@ -156,7 +157,7 @@ authMod.onAuthStateChanged(auth, (u) => {
 function listen() {
   const q = fs.query(fs.collection(db, 'inscripciones'), fs.orderBy('creado', 'desc'));
   unsubscribe = fs.onSnapshot(q, (snap) => {
-    rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    rows = snap.docs.map((d) => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }));
     render();
     if (current) {
       const fresh = rows.find((r) => r.id === current.id);
@@ -325,6 +326,16 @@ function renderReview() {
     </div>`;
 }
 
+// Mantiene al día la consulta pública /verificar (solo si ese registro pertenece a esta inscripción)
+async function syncVerification(batch, r, estado) {
+  const vref = fs.doc(db, 'verificacion', r.cedulaKey || cedulaKey(r.cedula));
+  const v = await fs.getDoc(vref);
+  const mine = !v.exists() || v.data().ref === r.id;
+  if (!mine) return;
+  if (estado === null) { if (v.exists()) batch.delete(vref); return; }
+  batch.set(vref, { ref: r.id, codigo: r.codigo, nombre: shortName(r.nombre), distancia: r.distancia, estado, actualizado: fs.serverTimestamp() });
+}
+
 $('dReview').addEventListener('click', async (e) => {
   const el = e.target.closest('[data-act]');
   if (!el || !current) return;
@@ -340,25 +351,32 @@ $('dReview').addEventListener('click', async (e) => {
 
   el.disabled = true;
   try {
+    const batch = fs.writeBatch(db);
     if (act === 'aprobar') {
-      await fs.updateDoc(ref, { estado: 'aprobada', revisadoPor: user.email, revisadoEn: fs.serverTimestamp(), motivo: fs.deleteField() });
+      batch.update(ref, { estado: 'aprobada', revisadoPor: user.email, revisadoEn: fs.serverTimestamp(), motivo: fs.deleteField() });
+      await syncVerification(batch, current, 'aprobada');
+      await batch.commit();
       toast('Inscripción aprobada. Envía la confirmación por WhatsApp y correo.');
     } else if (act === 'rechazar') {
       const motivo = $('motivo').value.trim();
       if (!motivo) { $('motivo').focus(); el.disabled = false; return; }
-      await fs.updateDoc(ref, { estado: 'rechazada', motivo: motivo.slice(0, 300), revisadoPor: user.email, revisadoEn: fs.serverTimestamp() });
+      batch.update(ref, { estado: 'rechazada', motivo: motivo.slice(0, 300), revisadoPor: user.email, revisadoEn: fs.serverTimestamp() });
+      await syncVerification(batch, current, 'rechazada');
+      await batch.commit();
       toast('Inscripción rechazada. Avisa al participante.');
     } else if (act === 'eliminar') {
       if (!confirm(`¿Eliminar definitivamente la inscripción ${current.codigo} de ${current.nombre}? No se puede deshacer.`)) { el.disabled = false; return; }
-      const batch = fs.writeBatch(db);
       batch.delete(ref);
       batch.delete(fs.doc(db, 'comprobantes', current.id));
+      await syncVerification(batch, current, null);
       await batch.commit();
       closeDetail();
       toast('Inscripción eliminada.');
     } else if (act === 'pendiente') {
-      await fs.updateDoc(ref, { estado: 'pendiente', revisadoPor: fs.deleteField(), revisadoEn: fs.deleteField(), motivo: fs.deleteField(),
+      batch.update(ref, { estado: 'pendiente', revisadoPor: fs.deleteField(), revisadoEn: fs.deleteField(), motivo: fs.deleteField(),
         notificadoWhatsapp: fs.deleteField(), notificadoCorreo: fs.deleteField() });
+      await syncVerification(batch, current, 'pendiente');
+      await batch.commit();
       toast('La inscripción volvió a pendiente.');
     }
   } catch (err) {

@@ -17,7 +17,7 @@ service cloud.firestore {
     // Ficha enviada por el corredor desde la web
     function validRegistration(d) {
       return d.keys().hasOnly(['nombre', 'cedula', 'nacimiento', 'sexo', 'distancia', 'categoria', 'talla',
-                               'celular', 'correo', 'club', 'sangre', 'emergencia', 'codigo', 'estado', 'creado'])
+                               'celular', 'correo', 'club', 'sangre', 'emergencia', 'codigo', 'cedulaKey', 'estado', 'creado'])
         && text(d.nombre, 3, 200) && text(d.cedula, 5, 200) && text(d.nacimiento, 10, 10)
         && d.sexo in ['Mujer', 'Hombre']
         && d.distancia in ['14K Jaguar', '7K Armadillo']
@@ -25,7 +25,7 @@ service cloud.firestore {
         && d.talla in ['XS', 'S', 'M', 'L', 'XL', 'XXL']
         && text(d.celular, 7, 200) && text(d.correo, 5, 200) && d.correo.matches('[^@ ]+@[^@ ]+[.][^@ ]+')
         && text(d.club, 0, 200) && text(d.sangre, 0, 200) && text(d.emergencia, 3, 200)
-        && text(d.codigo, 9, 9)
+        && text(d.codigo, 9, 9) && text(d.cedulaKey, 5, 40)
         && d.estado == 'pendiente'
         && d.creado == request.time;
     }
@@ -34,6 +34,29 @@ service cloud.firestore {
       allow create: if validRegistration(request.resource.data)
         && existsAfter(/databases/$(database)/documents/comprobantes/$(id));
       allow read, update, delete: if isAdmin();
+    }
+
+    // Consulta pública por cédula (página /verificar). Solo datos mínimos; el id del documento es la cédula
+    // normalizada. Se puede leer un documento conociendo la cédula, pero no listar la colección.
+    function validVerification(key) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['ref', 'codigo', 'nombre', 'distancia', 'estado', 'actualizado'])
+        && d.estado == 'pendiente'
+        && d.actualizado == request.time
+        && text(d.nombre, 1, 60) && text(d.ref, 10, 40)
+        && existsAfter(/databases/$(database)/documents/inscripciones/$(d.ref))
+        && getAfter(/databases/$(database)/documents/inscripciones/$(d.ref)).data.cedulaKey == key
+        && getAfter(/databases/$(database)/documents/inscripciones/$(d.ref)).data.codigo == d.codigo
+        && getAfter(/databases/$(database)/documents/inscripciones/$(d.ref)).data.distancia == d.distancia;
+    }
+
+    match /verificacion/{key} {
+      allow get: if true;
+      allow list: if isAdmin();
+      // El corredor crea su registro al inscribirse; solo puede reemplazarlo si su inscripción anterior fue rechazada
+      allow create: if isAdmin() || validVerification(key);
+      allow update: if isAdmin() || (resource.data.estado == 'rechazada' && validVerification(key));
+      allow delete: if isAdmin();
     }
 
     // Foto del comprobante (JPEG comprimido en el navegador, guardado aparte para no cargarlo en los listados)

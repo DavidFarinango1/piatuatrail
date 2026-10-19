@@ -32,16 +32,18 @@
     .btn[disabled] { opacity: .55; cursor: wait; }
     main { width: min(1200px, 100% - 32px); margin: 20px auto 60px; }
     .card { background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
-    .login { max-width: 420px; margin: 10vh auto; padding: 32px; text-align: center; }
-    .login h2 { font-size: 2rem; color: var(--moss); margin-bottom: .4rem; }
-    .login p { color: var(--muted); }
+    .login-screen { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: #f8f5ee; }
+    .login { width: min(384px, 100%); padding: 32px; border: 1px solid #ebe5d6; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+    .login h2 { font-size: 1.7rem; color: var(--jungle); text-transform: uppercase; }
     .msg { margin-top: 1rem; color: var(--no); font-weight: 600; }
     .msg.ok { color: var(--ok); }
-    .login__form { display: grid; gap: 12px; text-align: left; margin-top: 16px; }
-    .login__form label { display: grid; gap: 4px; font-size: .82rem; font-weight: 700; color: var(--moss); }
-    .login__form input { font: inherit; padding: .7rem .8rem; border: 1.5px solid var(--line); border-radius: 10px; }
-    .login__form .btn { margin-top: 4px; }
-    .link { margin-top: 12px; background: none; border: 0; color: var(--leaf); font-weight: 600; text-decoration: underline; }
+    .login__form { display: grid; gap: 16px; margin-top: 22px; }
+    .login__form label { display: grid; gap: 8px; font-size: .88rem; font-weight: 600; color: var(--moss); }
+    .login__form input { font: inherit; padding: .85rem .9rem; border: 1px solid #d9cfb6; border-radius: 10px; background: #fff; }
+    .login__form input:focus { outline: none; border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(47,122,70,.18); }
+    .login__form .btn { padding: .95rem; font-size: 1rem; letter-spacing: .04em; text-transform: uppercase; background: var(--leaf); color: #fff; }
+    .login__form .btn:hover { background: var(--moss); }
+    .link { display: block; margin: 14px auto 0; background: none; border: 0; color: var(--muted); font-size: .85rem; text-decoration: underline; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat { padding: 14px 16px; }
     .stat b { display: block; font-family: 'Bebas Neue', Impact, sans-serif; font-size: 2.2rem; font-weight: 400; line-height: 1; }
@@ -99,15 +101,15 @@
   </style>
 </head>
 <body>
-  <div class="top">
+  <div class="top" id="topBar" hidden>
     <h1>Piatúa <b>Ñampy</b> · Inscripciones</h1>
     <div class="who" id="who" hidden><span id="whoEmail"></span><button class="btn btn--ghost btn--sm" id="logout">Salir</button></div>
   </div>
 
   <!-- Acceso -->
-  <div class="card login" id="loginView">
-    <h2>Panel administrativo</h2>
-    <p>Ingresa con el correo y la contraseña de administración.</p>
+  <div class="login-screen" id="loginView">
+  <div class="card login">
+    <h2>Administración</h2>
     <form id="loginForm" class="login__form">
       <label>Correo<input type="email" id="loginEmail" autocomplete="username" required /></label>
       <label>Contraseña<input type="password" id="loginPass" autocomplete="current-password" required /></label>
@@ -115,6 +117,7 @@
     </form>
     <button class="link" id="forgot" type="button">¿Olvidaste tu contraseña?</button>
     <p class="msg" id="loginMsg"></p>
+  </div>
   </div>
 
   <!-- Panel -->

@@ -14,6 +14,17 @@ export const firebaseConfig = {
 // Correos con acceso al panel administrativo (deben coincidir con firestore.rules)
 export const ADMINS = ['nestorquinapanta@gmail.com'];
 
+// Cédula/pasaporte normalizado: id del documento de consulta pública (verificacion/{key})
+export const cedulaKey = (v) => String(v || '').toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 40);
+
+// Nombre abreviado para la consulta pública: "Juan Pérez López" → "Juan P."
+export function shortName(full) {
+  const p = String(full || '').trim().split(/\s+/).filter(Boolean);
+  if (!p.length) return '—';
+  const first = p[0].charAt(0).toUpperCase() + p[0].slice(1).toLowerCase();
+  return (p[1] ? `${first} ${p[1].charAt(0).toUpperCase()}.` : first).slice(0, 60);
+}
+
 let cache;
 export async function loadFirebase() {
   if (cache) return cache;
