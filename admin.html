@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Panel de inscripciones · Piatúa Ñampy</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --jungle:#0d1f14; --moss:#1f4d2e; --leaf:#2f7a46; --gold:#d9a93b; --mud:#7a4e2d; --cream:#f5efe2; --ink:#1b241d; --muted:#5f6b62; --line:#e2dccd;
+            --pend:#b7791f; --pend-bg:#fdf3e1; --ok:#2f7a46; --ok-bg:#e6f3ea; --no:#b03a2e; --no-bg:#fbe9e7; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.5 'Inter', system-ui, sans-serif; color: var(--ink); background: var(--cream); }
+    h1, h2, h3 { font-family: 'Bebas Neue', Impact, sans-serif; font-weight: 400; letter-spacing: .03em; line-height: 1.05; margin: 0; }
+    button { font: inherit; cursor: pointer; }
+    [hidden] { display: none !important; }
+    .top { background: var(--jungle); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .top h1 { font-size: 1.6rem; }
+    .top h1 b { color: var(--gold); font-weight: 400; }
+    .top .who { margin-left: auto; font-size: .85rem; opacity: .85; display: flex; align-items: center; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .6rem 1rem; border-radius: 999px; border: 2px solid transparent; font-weight: 700; font-size: .85rem; text-decoration: none; white-space: nowrap; }
+    .btn--gold { background: var(--gold); color: var(--jungle); }
+    .btn--ok { background: var(--ok); color: #fff; }
+    .btn--no { background: #fff; color: var(--no); border-color: var(--no); }
+    .btn--wa { background: #25d366; color: #06301a; }
+    .btn--mail { background: #fff; color: #c5221f; border-color: #c5221f; }
+    .btn--ghost { background: transparent; color: inherit; border-color: currentColor; }
+    .btn--sm { padding: .35rem .75rem; font-size: .78rem; }
+    .btn[disabled] { opacity: .55; cursor: wait; }
+    main { width: min(1200px, 100% - 32px); margin: 20px auto 60px; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+    .login { max-width: 420px; margin: 10vh auto; padding: 32px; text-align: center; }
+    .login h2 { font-size: 2rem; color: var(--moss); margin-bottom: .4rem; }
+    .login p { color: var(--muted); }
+    .msg { margin-top: 1rem; color: var(--no); font-weight: 600; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat { padding: 14px 16px; }
+    .stat b { display: block; font-family: 'Bebas Neue', Impact, sans-serif; font-size: 2.2rem; font-weight: 400; line-height: 1; }
+    .stat span { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .stat small { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
+    .stat.pend b { color: var(--pend); } .stat.ok b { color: var(--ok); } .stat.no b { color: var(--no); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; margin-bottom: 12px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tabs button { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: .45rem .9rem; font-weight: 600; font-size: .85rem; }
+    .tabs button[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: #fff; }
+    .toolbar input, .toolbar select { font: inherit; padding: .5rem .8rem; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; }
+    .toolbar input { flex: 1; min-width: 200px; }
+    .toolbar .btn { margin-left: auto; }
+    .list { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    th { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: #faf7ef; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #faf7ef; }
+    td .sub { display: block; color: var(--muted); font-size: .8rem; }
+    .pill { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+    .pill.pendiente { background: var(--pend-bg); color: var(--pend); }
+    .pill.aprobada { background: var(--ok-bg); color: var(--ok); }
+    .pill.rechazada { background: var(--no-bg); color: var(--no); }
+    .flag { display: inline-block; margin-left: 6px; padding: .05rem .45rem; border-radius: 6px; background: var(--no-bg); color: var(--no); font-size: .7rem; font-weight: 700; }
+    .sent { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+    .sent .on { color: var(--ok); font-weight: 700; }
+    .empty { padding: 40px; text-align: center; color: var(--muted); }
+    /* Detalle */
+    .overlay { position: fixed; inset: 0; z-index: 20; background: rgba(13,31,20,.6); display: flex; justify-content: flex-end; }
+    .drawer { width: min(980px, 100%); height: 100%; background: var(--cream); overflow-y: auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: start; }
+    .drawer header { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .drawer header h2 { font-size: 2rem; color: var(--moss); }
+    .drawer header .close { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #fff; font-size: 1.2rem; }
+    .box { padding: 16px; }
+    .box h3 { font-size: 1.3rem; color: var(--mud); margin-bottom: 8px; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: .92rem; }
+    dt { color: var(--muted); font-weight: 600; }
+    dd { margin: 0; word-break: break-word; }
+    .receipt { min-height: 240px; display: grid; place-items: center; background: #f2eee3; border-radius: 10px; overflow: hidden; }
+    .receipt img { width: 100%; height: auto; display: block; cursor: zoom-in; }
+    .receipt p { color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .notify { margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--ok-bg); }
+    .notify.no { background: var(--no-bg); }
+    .notify p { margin: 0 0 8px; font-size: .88rem; }
+    textarea { width: 100%; font: inherit; padding: .6rem; border: 1.5px solid var(--line); border-radius: 10px; min-height: 70px; }
+    .hint { font-size: .8rem; color: var(--muted); }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 40; background: var(--jungle); color: #fff; padding: .7rem 1.2rem; border-radius: 10px; font-weight: 600; }
+    @media (max-width: 860px) {
+      .drawer { grid-template-columns: 1fr; }
+      .hide-sm { display: none; }
+      .toolbar .btn { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <h1>Piatúa <b>Ñampy</b> · Inscripciones</h1>
+    <div class="who" id="who" hidden><span id="whoEmail"></span><button class="btn btn--ghost btn--sm" id="logout">Salir</button></div>
+  </div>
+
+  <!-- Acceso -->
+  <div class="card login" id="loginView">
+    <h2>Panel administrativo</h2>
+    <p>Entra con la cuenta de Google autorizada<br />(nestorquinapanta@gmail.com).</p>
+    <button class="btn btn--gold" id="loginBtn">Entrar con Google</button>
+    <p class="msg" id="loginMsg"></p>
+  </div>
+
+  <!-- Panel -->
+  <main id="appView" hidden>
+    <section class="stats">
+      <div class="card stat"><span>Total</span><b id="sTotal">0</b><small id="sDist"></small></div>
+      <div class="card stat pend"><span>Pendientes</span><b id="sPend">0</b></div>
+      <div class="card stat ok"><span>Aprobadas</span><b id="sOk">0</b><small id="sMoney"></small></div>
+      <div class="card stat no"><span>Rechazadas</span><b id="sNo">0</b></div>
+    </section>
+
+    <section class="card toolbar">
+      <div class="tabs" id="tabs">
+        <button data-f="pendiente" aria-pressed="true">Pendientes</button>
+        <button data-f="aprobada" aria-pressed="false">Aprobadas</button>
+        <button data-f="rechazada" aria-pressed="false">Rechazadas</button>
+        <button data-f="todas" aria-pressed="false">Todas</button>
+      </div>
+      <select id="fDist" aria-label="Distancia">
+        <option value="">Todas las distancias</option><option>14K Jaguar</option><option>7K Armadillo</option>
+      </select>
+      <input type="search" id="search" placeholder="Buscar por nombre, cédula, código o celular" />
+      <button class="btn btn--ghost btn--sm" id="exportCsv">Descargar Excel (CSV)</button>
+    </section>
+
+    <section class="card list">
+      <table>
+        <thead><tr><th>Fecha</th><th>Participante</th><th class="hide-sm">Distancia / categoría</th><th class="hide-sm">Contacto</th><th>Estado</th><th class="hide-sm">Avisos</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="empty" id="empty" hidden>No hay inscripciones en esta vista.</p>
+    </section>
+  </main>
+
+  <!-- Detalle de una inscripción -->
+  <div class="overlay" id="detail" hidden>
+    <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="dName">
+      <header>
+        <h2 id="dName"></h2>
+        <span class="pill" id="dState"></span>
+        <button class="close" id="dClose" aria-label="Cerrar">✕</button>
+      </header>
+      <div class="card box">
+        <h3>Comprobante de pago</h3>
+        <div class="receipt" id="dReceipt"><p>Cargando…</p></div>
+        <p class="hint">Haz clic en la imagen para verla en tamaño completo.</p>
+      </div>
+      <div>
+        <div class="card box">
+          <h3>Datos del participante</h3>
+          <dl id="dData"></dl>
+        </div>
+        <div class="card box" style="margin-top:18px">
+          <h3>Revisión</h3>
+          <div id="dReview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script type="module" src="assets/js/admin.js"></script>
+</body>
+</html>

@@ -12,7 +12,8 @@
       "README.md",
       "_originales/**",
       "_test.html",
-      "**/.*"
+      "**/.*",
+      "firestore.rules"
     ],
     "cleanUrls": true,
     "headers": [
@@ -51,7 +52,32 @@
             "value": "no-cache"
           }
         ]
+      },
+      {
+        "source": "/admin",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/reglamento",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

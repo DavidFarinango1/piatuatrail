@@ -291,3 +291,12 @@ p { margin: 0 0 1em; }
   .hero__title { font-size: clamp(4rem, 8.5vw, 8rem); }
 }
 .center .btn { margin: .3rem; }
+
+/* ---------- Comprobante y confirmación de envío ---------- */
+.form .file input { padding: .6rem; background: #fff; cursor: pointer; }
+.form .file small { font-weight: 500; color: var(--muted); }
+.file__preview { margin: 0; }
+.file__preview img { max-height: 220px; max-width: 100%; border-radius: 10px; border: 1px solid #cfc7b4; }
+.form--done h3 { color: var(--leaf); }
+.form--done .code { font-family: var(--head); font-size: 1.5rem; letter-spacing: .08em; color: var(--mud); }
+.form button[disabled] { opacity: .6; cursor: wait; }

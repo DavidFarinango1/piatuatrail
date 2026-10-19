@@ -258,7 +258,7 @@
       <div class="section__head reveal">
         <p class="kicker">Inscripciones abiertas</p>
         <h2>Inscríbete en 3 pasos</h2>
-        <p>Paga, envía tu comprobante con tus datos y recibe la confirmación de tu cupo por correo o WhatsApp.</p>
+        <p>Paga, completa la ficha subiendo la foto de tu comprobante y recibe la confirmación de tu cupo por WhatsApp y correo.</p>
         <p class="deadline">Cierre de inscripciones: jueves 12 de noviembre de 2026</p>
       </div>
 
@@ -270,8 +270,8 @@
         </li>
         <li>
           <span>2</span>
-          <h3>Envía comprobante y datos</h3>
-          <p>Completa el formulario de abajo y envíalo por <b>WhatsApp</b> o <b>correo</b> adjuntando la foto del comprobante.</p>
+          <h3>Completa la ficha</h3>
+          <p>Llena el formulario de abajo y <b>sube la foto o captura de tu comprobante</b> de pago.</p>
         </li>
         <li>
           <span>3</span>
@@ -329,18 +329,28 @@
             <label>Ciudad / Club<input name="club" /></label>
             <label>Tipo de sangre<input name="sangre" placeholder="Ej. O+" /></label>
             <label class="span-2">Contacto de emergencia (nombre y teléfono) *<input name="emergencia" required /></label>
+            <label class="span-2 file">Foto o captura del comprobante de pago *
+              <input type="file" name="comprobante" id="comprobante" accept="image/*" required />
+              <small>Formato JPG o PNG. Asegúrate de que se vean el monto, la fecha y el número de transacción.</small>
+            </label>
+            <figure class="file__preview span-2" id="comprobantePreview" hidden><img alt="Vista previa del comprobante" /></figure>
             <label class="check span-2"><input type="checkbox" name="acepto" required /> <span>Acepto el <a href="reglamento.html" target="_blank">Reglamento Oficial</a> y la <a href="guia.html" target="_blank">Guía del Corredor</a>, y declaro estar en condiciones físicas para participar.</span></label>
           </div>
           <p class="form__error" id="formError" role="alert"></p>
           <div class="form__actions">
-            <button type="submit" class="btn btn--wa" data-channel="wa">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>
-              Enviar por WhatsApp
-            </button>
-            <button type="submit" class="btn btn--line" data-channel="mail">Enviar por correo</button>
+            <button type="submit" class="btn btn--gold" id="regSubmit">Enviar inscripción</button>
           </div>
-          <p class="note">Al enviar se abrirá WhatsApp o tu correo con tus datos listos. <b>Adjunta la foto del comprobante de pago</b> antes de enviar.</p>
+          <p class="note">La organización revisará tu comprobante y te enviará la confirmación por <b>WhatsApp</b> y <b>correo</b>.</p>
         </form>
+
+        <!-- Inscripción recibida -->
+        <div class="form form--done reveal" id="regDone" hidden>
+          <h3>¡Inscripción recibida!</h3>
+          <p>Gracias, <b data-done="nombre"></b>. Tu código de inscripción es <b class="code" data-done="codigo"></b>.</p>
+          <p>La organización revisará tu comprobante y te enviará la confirmación a tu WhatsApp <b data-done="celular"></b> y a tu correo <b data-done="correo"></b>.</p>
+          <p class="note">¿Dudas? Escríbenos al <a href="https://wa.me/593991570800" target="_blank" rel="noopener">WhatsApp +593 99 157 0800</a> indicando tu código.</p>
+          <button type="button" class="btn btn--line" id="regAnother">Inscribir a otra persona</button>
+        </div>
       </div>
     </div>
   </section>

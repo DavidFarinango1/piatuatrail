@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Correos con acceso al panel (deben coincidir con ADMINS en assets/js/firebase.js)
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['nestorquinapanta@gmail.com'];
+    }
+
+    function text(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    // Ficha enviada por el corredor desde la web
+    function validRegistration(d) {
+      return d.keys().hasOnly(['nombre', 'cedula', 'nacimiento', 'sexo', 'distancia', 'categoria', 'talla',
+                               'celular', 'correo', 'club', 'sangre', 'emergencia', 'codigo', 'estado', 'creado'])
+        && text(d.nombre, 3, 200) && text(d.cedula, 5, 200) && text(d.nacimiento, 10, 10)
+        && d.sexo in ['Mujer', 'Hombre']
+        && d.distancia in ['14K Jaguar', '7K Armadillo']
+        && text(d.categoria, 1, 200)
+        && d.talla in ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+        && text(d.celular, 7, 200) && text(d.correo, 5, 200) && d.correo.matches('[^@ ]+@[^@ ]+[.][^@ ]+')
+        && text(d.club, 0, 200) && text(d.sangre, 0, 200) && text(d.emergencia, 3, 200)
+        && text(d.codigo, 9, 9)
+        && d.estado == 'pendiente'
+        && d.creado == request.time;
+    }
+
+    match /inscripciones/{id} {
+      allow create: if validRegistration(request.resource.data)
+        && existsAfter(/databases/$(database)/documents/comprobantes/$(id));
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Foto del comprobante (JPEG comprimido en el navegador, guardado aparte para no cargarlo en los listados)
+    match /comprobantes/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['imagen', 'creado'])
+        && request.resource.data.imagen is string
+        && request.resource.data.imagen.size() > 100
+        && request.resource.data.imagen.size() < 1000000
+        && request.resource.data.creado == request.time
+        && existsAfter(/databases/$(database)/documents/inscripciones/$(id));
+      allow read, delete: if isAdmin();
+    }
+  }
+}

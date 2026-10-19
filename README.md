@@ -54,3 +54,11 @@ DNS en Namecheap (Domain List → piatuatrail.com → Advanced DNS):
 - Repositorio: https://github.com/DavidFarinango1/piatuatrail → https://davidfarinango1.github.io/piatuatrail/ (sin dominio propio).
 - Para actualizarlo: `git add -A && git commit -m "cambio" && git push`.
 - `_originales/` no se sube (está en `.gitignore`).
+
+## Inscripciones y panel administrativo
+
+- La ficha de `index.html` guarda cada inscripción en Firestore (`inscripciones/{id}`) y la foto del comprobante, comprimida en el navegador, en `comprobantes/{id}`. Código para el corredor: `PN-XXXXXX`.
+- Panel: https://www.piatuatrail.com/admin (`admin.html` + `assets/js/admin.js`). Acceso con Google, solo `nestorquinapanta@gmail.com`.
+- Para cambiar quién entra al panel: editar la lista en `assets/js/firebase.js` (`ADMINS`) **y** en `firestore.rules` (`isAdmin`), luego `firebase deploy --only firestore:rules,hosting`.
+- Al aprobar o rechazar, el panel abre WhatsApp (wa.me) y Gmail con el mensaje listo; los textos están al inicio de `assets/js/admin.js` (`MSG`).
+- El dominio usado para el panel debe estar en Firebase → Authentication → Configuración → Dominios autorizados.

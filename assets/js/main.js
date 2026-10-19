@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  var WHATSAPP = '593991570800';
-  var EMAILS = 'kinesportssas@gmail.com,quinesclub@gmail.com';
+  // Módulo de Firebase (se carga solo al enviar la ficha)
+  var FIREBASE_URL = new URL('firebase.js', document.currentScript.src).href;
   // Largada 14K: 14 nov 2026, 09h00 hora de Ecuador (UTC-5)
   var RACE_START = new Date('2026-11-14T09:00:00-05:00');
 
@@ -146,44 +146,67 @@
     form.sexo.addEventListener(ev, updateCategory);
   });
 
-  function buildMessage(d) {
-    return [
-      'INSCRIPCIÓN · PIATÚA ÑAMPY TRAIL RUNNING 2026',
-      '',
-      'Nombres y apellidos: ' + d.nombre,
-      'Cédula / Pasaporte: ' + d.cedula,
-      'Fecha de nacimiento: ' + d.nacimiento,
-      'Sexo: ' + d.sexo,
-      'Distancia: ' + d.distancia,
-      'Categoría: ' + d.categoria,
-      'Talla de camiseta: ' + d.talla,
-      'Celular: ' + d.celular,
-      'Correo: ' + d.correo,
-      'Ciudad / Club: ' + (d.club || '-'),
-      'Tipo de sangre: ' + (d.sangre || '-'),
-      'Contacto de emergencia: ' + d.emergencia,
-      '',
-      'Adjunto el comprobante de pago. Acepto el reglamento y la Guía del Corredor.'
-    ].join('\n');
-  }
+  /* ---------- Comprobante: vista previa y compresión ---------- */
+  var fileInput = document.getElementById('comprobante');
+  var preview = document.getElementById('comprobantePreview');
+  var MAX_CHARS = 900000; // límite del documento en Firestore (1 MB), con margen
 
-  var channel = 'wa';
-  form.querySelectorAll('button[type="submit"]').forEach(function (b) {
-    b.addEventListener('click', function () { channel = b.getAttribute('data-channel'); });
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files[0];
+    if (!f) { preview.hidden = true; return; }
+    preview.querySelector('img').src = URL.createObjectURL(f);
+    preview.hidden = false;
   });
 
-  form.addEventListener('submit', function (e) {
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error('formato')); };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // Reduce la foto a JPEG hasta que quepa en un documento de Firestore
+  async function compress(file) {
+    var img = await loadImage(file);
+    var side = 1600, quality = 0.8, data = '';
+    for (var i = 0; i < 8; i++) {
+      var scale = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      data = canvas.toDataURL('image/jpeg', quality);
+      if (data.length <= MAX_CHARS) return data;
+      if (quality > 0.55) quality -= 0.1; else side = Math.round(side * 0.8);
+    }
+    throw new Error('tamaño');
+  }
+
+  /* ---------- Envío a Firebase ---------- */
+  var submitBtn = document.getElementById('regSubmit');
+  var done = document.getElementById('regDone');
+  var FIELDS = ['nombre', 'cedula', 'nacimiento', 'sexo', 'distancia', 'categoria', 'talla', 'celular', 'correo', 'club', 'sangre', 'emergencia'];
+
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
     errorBox.textContent = '';
     var firstBad = null;
     form.querySelectorAll('[required]').forEach(function (el) {
-      var ok = el.type === 'checkbox' ? el.checked : el.checkValidity() && el.value.trim() !== '';
+      var ok = el.type === 'checkbox' ? el.checked
+        : el.type === 'file' ? el.files.length > 0
+        : el.checkValidity() && el.value.trim() !== '';
       el.classList.toggle('invalid', !ok);
       if (!ok && !firstBad) firstBad = el;
     });
     if (firstBad) {
       errorBox.textContent = firstBad.type === 'checkbox'
-        ? 'Debes aceptar el reglamento y la Guía del Corredor.'
+        ? 'Debes aceptar el Reglamento Oficial y la Guía del Corredor.'
+        : firstBad.type === 'file' ? 'Sube la foto o captura de tu comprobante de pago.'
         : 'Revisa los campos marcados en rojo.';
       firstBad.focus();
       return;
@@ -194,16 +217,52 @@
       return;
     }
 
-    var data = {};
-    new FormData(form).forEach(function (v, k) { data[k] = String(v).trim(); });
-    data.categoria = catInput.value;
-    var msg = buildMessage(data);
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando…';
+    try {
+      var imagen;
+      try { imagen = await compress(fileInput.files[0]); }
+      catch (err) {
+        throw new Error('No pudimos leer la imagen del comprobante. Sube una captura de pantalla en formato JPG o PNG.');
+      }
 
-    if (channel === 'mail') {
-      var subject = 'Inscripción Piatúa Ñampy ' + data.distancia + ' - ' + data.nombre;
-      window.location.href = 'mailto:' + EMAILS + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(msg);
-    } else {
-      window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      var data = {};
+      FIELDS.forEach(function (k) { data[k] = String(form[k].value || '').trim().slice(0, 200); });
+      data.correo = data.correo.toLowerCase();
+
+      var fb = await import(FIREBASE_URL);
+      var c = await fb.loadFirebase();
+      var ref = c.fs.doc(c.fs.collection(c.db, 'inscripciones'));
+      data.codigo = 'PN-' + ref.id.slice(0, 6).toUpperCase();
+      data.estado = 'pendiente';
+      data.creado = c.fs.serverTimestamp();
+
+      var batch = c.fs.writeBatch(c.db);
+      batch.set(ref, data);
+      batch.set(c.fs.doc(c.db, 'comprobantes', ref.id), { imagen: imagen, creado: c.fs.serverTimestamp() });
+      await batch.commit();
+
+      done.querySelectorAll('[data-done]').forEach(function (el) { el.textContent = data[el.getAttribute('data-done')]; });
+      form.hidden = true;
+      done.hidden = false;
+      done.classList.add('is-in');
+      done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+      errorBox.textContent = err && err.message && err.message.indexOf('comprobante') > -1 ? err.message
+        : 'No se pudo enviar la inscripción. Revisa tu conexión e inténtalo de nuevo. Si persiste, escríbenos al WhatsApp +593 99 157 0800.';
+      if (window.console) console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar inscripción';
     }
+  });
+
+  document.getElementById('regAnother').addEventListener('click', function () {
+    form.reset();
+    preview.hidden = true;
+    catInput.value = '';
+    done.hidden = true;
+    form.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 })();
