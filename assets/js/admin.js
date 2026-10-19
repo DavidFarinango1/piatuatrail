@@ -105,16 +105,32 @@ let user, rows = [], filter = 'pendiente', current = null, unsubscribe = null;
 const fb = await loadAuth();
 const { authMod, auth, fs, db } = fb;
 
-$('loginBtn').addEventListener('click', async () => {
-  $('loginMsg').textContent = '';
+const loginMsg = (text, ok = false) => { $('loginMsg').textContent = text; $('loginMsg').classList.toggle('ok', ok); };
+
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  loginMsg('');
+  $('loginBtn').disabled = true;
   try {
-    const provider = new authMod.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    await authMod.signInWithPopup(auth, provider);
-  } catch (e) {
-    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-      $('loginMsg').textContent = 'No se pudo iniciar sesión (' + (e.code || e.message) + ').';
-    }
+    await authMod.signInWithEmailAndPassword(auth, $('loginEmail').value.trim().toLowerCase(), $('loginPass').value);
+  } catch (err) {
+    loginMsg(['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(err.code)
+      ? 'Correo o contraseña incorrectos.'
+      : err.code === 'auth/too-many-requests' ? 'Demasiados intentos. Espera unos minutos o restablece la contraseña.'
+      : 'No se pudo iniciar sesión (' + (err.code || err.message) + ').');
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+});
+
+$('forgot').addEventListener('click', async () => {
+  const email = $('loginEmail').value.trim().toLowerCase();
+  if (!ADMINS.includes(email)) { loginMsg('Escribe primero el correo de administración y vuelve a pulsar aquí.'); $('loginEmail').focus(); return; }
+  try {
+    await authMod.sendPasswordResetEmail(auth, email);
+    loginMsg('Te enviamos un correo a ' + email + ' para crear una nueva contraseña.', true);
+  } catch (err) {
+    loginMsg('No se pudo enviar el correo (' + (err.code || err.message) + ').');
   }
 });
 $('logout').addEventListener('click', () => authMod.signOut(auth));
@@ -127,6 +143,7 @@ authMod.onAuthStateChanged(auth, (u) => {
     return;
   }
   user = u;
+  if (u) $('loginPass').value = '';
   $('loginView').hidden = !!u;
   $('appView').hidden = !u;
   $('who').hidden = !u;

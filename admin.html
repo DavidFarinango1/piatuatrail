@@ -36,6 +36,12 @@
     .login h2 { font-size: 2rem; color: var(--moss); margin-bottom: .4rem; }
     .login p { color: var(--muted); }
     .msg { margin-top: 1rem; color: var(--no); font-weight: 600; }
+    .msg.ok { color: var(--ok); }
+    .login__form { display: grid; gap: 12px; text-align: left; margin-top: 16px; }
+    .login__form label { display: grid; gap: 4px; font-size: .82rem; font-weight: 700; color: var(--moss); }
+    .login__form input { font: inherit; padding: .7rem .8rem; border: 1.5px solid var(--line); border-radius: 10px; }
+    .login__form .btn { margin-top: 4px; }
+    .link { margin-top: 12px; background: none; border: 0; color: var(--leaf); font-weight: 600; text-decoration: underline; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat { padding: 14px 16px; }
     .stat b { display: block; font-family: 'Bebas Neue', Impact, sans-serif; font-size: 2.2rem; font-weight: 400; line-height: 1; }
@@ -101,8 +107,13 @@
   <!-- Acceso -->
   <div class="card login" id="loginView">
     <h2>Panel administrativo</h2>
-    <p>Entra con la cuenta de Google autorizada<br />(nestorquinapanta@gmail.com).</p>
-    <button class="btn btn--gold" id="loginBtn">Entrar con Google</button>
+    <p>Ingresa con el correo y la contraseña de administración.</p>
+    <form id="loginForm" class="login__form">
+      <label>Correo<input type="email" id="loginEmail" autocomplete="username" required /></label>
+      <label>Contraseña<input type="password" id="loginPass" autocomplete="current-password" required /></label>
+      <button class="btn btn--gold" id="loginBtn" type="submit">Entrar</button>
+    </form>
+    <button class="link" id="forgot" type="button">¿Olvidaste tu contraseña?</button>
     <p class="msg" id="loginMsg"></p>
   </div>
 
