@@ -61,5 +61,6 @@ DNS en Namecheap (Domain List → piatuatrail.com → Advanced DNS):
 - Panel: https://www.piatuatrail.com/admin (`admin.html` + `assets/js/admin.js`). Acceso con correo y contraseña (Firebase Authentication), solo `nestorquinapanta@gmail.com`. La contraseña se cambia con "¿Olvidaste tu contraseña?" en el panel.
 - Para cambiar quién entra al panel: editar la lista en `assets/js/firebase.js` (`ADMINS`) **y** en `firestore.rules` (`isAdmin`), luego `firebase deploy --only firestore:rules,hosting`.
 - Consulta pública: https://www.piatuatrail.com/verificar (`verificar.html`). Lee `verificacion/{cédula normalizada}` (nombre abreviado, código, distancia, estado); el panel la actualiza al aprobar/rechazar/eliminar. También evita inscripciones duplicadas por cédula.
+- Panel con el formato de Baños Run (tabla N°/Estado/…/Comprobante/Acciones). El botón "Cerrar inscripciones" guarda `config/inscripciones.abiertas`; las reglas rechazan nuevas fichas cuando es `false` y la web muestra "Inscripciones cerradas".
 - Al aprobar o rechazar, el panel abre WhatsApp (wa.me) y Gmail con el mensaje listo; los textos están al inicio de `assets/js/admin.js` (`MSG`).
 - El dominio usado para el panel debe estar en Firebase → Authentication → Configuración → Dominios autorizados.

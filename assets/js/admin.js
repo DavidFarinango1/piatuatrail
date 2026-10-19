@@ -75,7 +75,10 @@ Organización Kinesport Eventos`
 /* ---------- Utilidades ---------- */
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fmtDate = (ts) => ts && ts.toDate ? ts.toDate().toLocaleString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+const fmtDate = (ts) => ts && ts.toDate ? ts.toDate().toLocaleString('es-EC', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+const LABEL = { pendiente: 'pendiente', aprobada: 'aprobado', rechazada: 'negado' };
+const SEXO = { Mujer: 'Damas', Hombre: 'Varones' };
+const catOnly = (c) => String(c || '').split(' · ')[0];
 
 // Celular ecuatoriano → formato internacional para wa.me (0991234567 → 593991234567)
 function waNumber(cel) {
@@ -86,9 +89,12 @@ function waNumber(cel) {
   if (d.length === 9 && d.startsWith('9')) return '593' + d;
   return d;
 }
-const waLink = (r, text) => `https://wa.me/${waNumber(r.celular)}?text=${encodeURIComponent(text)}`;
-const gmailLink = (r, subject, body, from) =>
-  `https://mail.google.com/mail/?view=cm&fs=1&authuser=${encodeURIComponent(from)}&to=${encodeURIComponent(r.correo)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+const waLink = (r) => `https://wa.me/${waNumber(r.celular)}?text=${encodeURIComponent(r.estado === 'aprobada' ? MSG.aprobadaWhatsapp(r) : MSG.rechazadaWhatsapp(r))}`;
+const gmailLink = (r) => {
+  const ok = r.estado === 'aprobada';
+  return `https://mail.google.com/mail/?view=cm&fs=1&authuser=${encodeURIComponent(user.email)}&to=${encodeURIComponent(r.correo)}` +
+    `&su=${encodeURIComponent(ok ? MSG.aprobadaAsunto(r) : MSG.rechazadaAsunto(r))}&body=${encodeURIComponent(ok ? MSG.aprobadaCorreo(r) : MSG.rechazadaCorreo(r))}`;
+};
 
 function toast(text) {
   const t = $('toast');
@@ -98,13 +104,17 @@ function toast(text) {
   toast.timer = setTimeout(() => { t.hidden = true; }, 3200);
 }
 
+const ICON = {
+  wa: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7zm4 2v8h1.5v-8zm2.5 0v8H14v-8z"/></svg>'
+};
+
 /* ---------- Estado ---------- */
-let user, rows = [], filter = 'pendiente', current = null, unsubscribe = null;
+let user, rows = [], order = {}, unsubscribe = null, unsubConfig = null, abiertas = true;
 
 /* ---------- Acceso ---------- */
-const fb = await loadAuth();
-const { authMod, auth, fs, db } = fb;
-
+const { authMod, auth, fs, db } = await loadAuth();
 const loginMsg = (text, ok = false) => { $('loginMsg').textContent = text; $('loginMsg').classList.toggle('ok', ok); };
 
 $('loginForm').addEventListener('submit', async (e) => {
@@ -133,22 +143,22 @@ $('forgot').addEventListener('click', async () => {
     loginMsg('No se pudo enviar el correo (' + (err.code || err.message) + ').');
   }
 });
+
 $('logout').addEventListener('click', () => authMod.signOut(auth));
 
 authMod.onAuthStateChanged(auth, (u) => {
   if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (unsubConfig) { unsubConfig(); unsubConfig = null; }
   if (u && !ADMINS.includes((u.email || '').toLowerCase())) {
-    $('loginMsg').textContent = `La cuenta ${u.email} no tiene acceso a este panel.`;
+    loginMsg(`La cuenta ${u.email} no tiene acceso a este panel.`);
     authMod.signOut(auth);
     return;
   }
   user = u;
-  if (u) $('loginPass').value = '';
   $('loginView').hidden = !!u;
   $('appView').hidden = !u;
-  $('who').hidden = !u;
-  $('topBar').hidden = !u;
   if (!u) return;
+  $('loginPass').value = '';
   $('whoEmail').textContent = u.email;
   listen();
 });
@@ -158,226 +168,179 @@ function listen() {
   const q = fs.query(fs.collection(db, 'inscripciones'), fs.orderBy('creado', 'desc'));
   unsubscribe = fs.onSnapshot(q, (snap) => {
     rows = snap.docs.map((d) => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }));
+    order = {};
+    rows.slice().reverse().forEach((r, i) => { order[r.id] = i + 1; }); // N° según orden de llegada
     render();
-    if (current) {
-      const fresh = rows.find((r) => r.id === current.id);
-      const key = (r) => [r.estado, r.motivo, !!r.notificadoWhatsapp, !!r.notificadoCorreo, !!r.revisadoEn].join('|');
-      if (fresh) {
-        const changed = key(fresh) !== key(current);
-        current = fresh;
-        if (changed) renderReview(); // no repinta si nada cambió (conserva el motivo que se esté escribiendo)
-      }
-    }
   }, (err) => {
     $('rows').innerHTML = '';
     $('empty').hidden = false;
-    $('empty').textContent = err.code === 'permission-denied'
-      ? 'Tu cuenta no tiene permiso para ver las inscripciones.'
-      : 'No se pudieron cargar las inscripciones: ' + err.message;
+    $('empty').textContent = err.code === 'permission-denied' ? 'Tu cuenta no tiene permiso para ver las inscripciones.' : 'No se pudieron cargar las inscripciones: ' + err.message;
+  });
+  unsubConfig = fs.onSnapshot(fs.doc(db, 'config', 'inscripciones'), (snap) => {
+    abiertas = !snap.exists() || snap.data().abiertas !== false;
+    $('status').className = 'status ' + (abiertas ? 'open' : 'closed');
+    $('statusText').innerHTML = abiertas
+      ? '<b>Inscripciones: ABIERTAS</b> — el formulario público está activo.'
+      : '<b>Inscripciones: CERRADAS</b> — el formulario público no acepta nuevas inscripciones.';
+    $('toggleOpen').textContent = abiertas ? 'Cerrar inscripciones' : 'Abrir inscripciones';
+    $('toggleOpen').className = 'btn ' + (abiertas ? 'btn--red' : 'btn--green');
   });
 }
 
-function duplicates() {
-  const count = {};
-  rows.filter((r) => r.estado !== 'rechazada').forEach((r) => {
-    const k = String(r.cedula || '').replace(/\W/g, '');
-    count[k] = (count[k] || 0) + 1;
-  });
-  return (r) => count[String(r.cedula || '').replace(/\W/g, '')] > 1 && r.estado !== 'rechazada';
-}
+$('toggleOpen').addEventListener('click', async () => {
+  const next = !abiertas;
+  if (!confirm(next ? '¿Abrir las inscripciones? El formulario público volverá a aceptar inscripciones.'
+    : '¿Cerrar las inscripciones? El formulario público dejará de aceptar nuevas inscripciones.')) return;
+  try {
+    await fs.setDoc(fs.doc(db, 'config', 'inscripciones'), { abiertas: next, actualizado: fs.serverTimestamp(), por: user.email });
+    toast(next ? 'Inscripciones abiertas.' : 'Inscripciones cerradas.');
+  } catch (err) { toast('No se pudo cambiar: ' + (err.code || err.message)); }
+});
 
 function visibleRows() {
   const term = $('search').value.trim().toLowerCase();
-  const dist = $('fDist').value;
+  const est = $('fEstado').value, dist = $('fDist').value, cat = $('fCat').value, sexo = $('fSexo').value;
   return rows.filter((r) =>
-    (filter === 'todas' || r.estado === filter) &&
-    (!dist || r.distancia === dist) &&
-    (!term || [r.nombre, r.cedula, r.codigo, r.celular, r.correo].some((v) => String(v || '').toLowerCase().includes(term))));
+    (!est || r.estado === est) && (!dist || r.distancia === dist) && (!cat || catOnly(r.categoria) === cat) && (!sexo || r.sexo === sexo) &&
+    (!term || [r.nombre, r.cedula, r.correo, r.codigo].some((v) => String(v || '').toLowerCase().includes(term))));
 }
 
 function render() {
-  const by = (e) => rows.filter((r) => r.estado === e).length;
-  const ok = rows.filter((r) => r.estado === 'aprobada');
-  $('sTotal').textContent = rows.length;
-  $('sPend').textContent = by('pendiente');
-  $('sOk').textContent = ok.length;
-  $('sNo').textContent = by('rechazada');
-  const d14 = ok.filter((r) => r.distancia === '14K Jaguar').length;
-  $('sDist').textContent = `Aprobadas: 14K ${d14} · 7K ${ok.length - d14}`;
-  $('sMoney').textContent = `$${ok.reduce((s, r) => s + (PRICES[r.distancia] || 0), 0)} validados`;
-
-  const isDup = duplicates();
   const list = visibleRows();
+  $('count').textContent = `${list.length} inscrito(s)`;
   $('empty').hidden = list.length > 0;
-  $('empty').textContent = 'No hay inscripciones en esta vista.';
-  $('rows').innerHTML = list.map((r) => `
-    <tr data-id="${esc(r.id)}">
-      <td>${esc(fmtDate(r.creado))}<span class="sub">${esc(r.codigo)}</span></td>
-      <td><b>${esc(r.nombre)}</b>${isDup(r) ? '<span class="flag">Cédula repetida</span>' : ''}<span class="sub">${esc(r.cedula)}</span></td>
-      <td class="hide-sm">${esc(r.distancia)}<span class="sub">${esc(r.categoria)} · Talla ${esc(r.talla)}</span></td>
-      <td class="hide-sm">${esc(r.celular)}<span class="sub">${esc(r.correo)}</span></td>
-      <td><span class="pill ${esc(r.estado)}">${esc(label(r.estado))}</span></td>
-      <td class="hide-sm sent">${r.estado === 'pendiente' ? '—' :
-        `<span class="${r.notificadoWhatsapp ? 'on' : ''}">WhatsApp ${r.notificadoWhatsapp ? '✓' : '·'}</span><br><span class="${r.notificadoCorreo ? 'on' : ''}">Correo ${r.notificadoCorreo ? '✓' : '·'}</span>`}</td>
-    </tr>`).join('');
+  $('empty').textContent = rows.length ? 'No hay inscripciones con estos filtros.' : 'Todavía no hay inscripciones.';
+  $('rows').innerHTML = list.map((r) => {
+    const done = r.estado !== 'pendiente';
+    return `<tr data-id="${esc(r.id)}">
+      <td>${order[r.id]}</td>
+      <td><span class="pill ${esc(r.estado)}">${esc(LABEL[r.estado] || r.estado)}</span></td>
+      <td>${esc(r.nombre)}</td>
+      <td class="nowrap">${esc(r.cedula)}</td>
+      <td>${esc(r.nacimiento)}</td>
+      <td>${esc(r.distancia)}</td>
+      <td>${esc(catOnly(r.categoria))}</td>
+      <td>${esc(SEXO[r.sexo] || r.sexo)}</td>
+      <td class="nowrap">${esc(r.celular)}</td>
+      <td class="mail">${esc(r.correo)}</td>
+      <td class="club">${esc(r.club)}</td>
+      <td>${esc(r.talla)}</td>
+      <td><button class="btn sm btn--orange" data-act="foto">Ver foto</button></td>
+      <td>
+        <div class="acts">
+          <button class="btn sm approve" data-act="aprobar" ${r.estado === 'aprobada' ? 'disabled' : ''}>Aprobar</button>
+          <button class="btn sm deny" data-act="negar" ${r.estado === 'rechazada' ? 'disabled' : ''}>Negar</button>
+          <div class="icons">
+            <button class="icon wa ${r.notificadoWhatsapp ? 'sent' : ''}" data-act="wa" ${done ? '' : 'disabled'} title="${done ? 'Enviar mensaje por WhatsApp' : 'Disponible al aprobar o negar'}">${ICON.wa}</button>
+            <button class="icon mail ${r.notificadoCorreo ? 'sent' : ''}" data-act="mail" ${done ? '' : 'disabled'} title="${done ? 'Enviar correo' : 'Disponible al aprobar o negar'}">${ICON.mail}</button>
+            <button class="icon" data-act="eliminar" title="Eliminar">${ICON.trash}</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-const label = (e) => ({ pendiente: 'Pendiente', aprobada: 'Aprobada', rechazada: 'Rechazada' }[e] || e);
+['search', 'fEstado', 'fDist', 'fCat', 'fSexo'].forEach((id) => $(id).addEventListener(id === 'search' ? 'input' : 'change', render));
 
-$('tabs').addEventListener('click', (e) => {
-  const b = e.target.closest('button');
-  if (!b) return;
-  filter = b.dataset.f;
-  $('tabs').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-  render();
-});
-$('search').addEventListener('input', render);
-$('fDist').addEventListener('change', render);
-$('rows').addEventListener('click', (e) => {
-  const tr = e.target.closest('tr[data-id]');
-  if (tr) openDetail(tr.dataset.id);
-});
+/* ---------- Ventanas ---------- */
+const openModal = (id) => { $(id).hidden = false; document.body.style.overflow = 'hidden'; };
+const closeModals = () => { document.querySelectorAll('.modal').forEach((m) => { m.hidden = true; }); document.body.style.overflow = ''; };
+document.querySelectorAll('.modal').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close]')) closeModals(); }));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
 
-/* ---------- Detalle ---------- */
-async function openDetail(id) {
-  current = rows.find((r) => r.id === id);
-  if (!current) return;
-  $('detail').hidden = false;
-  document.body.style.overflow = 'hidden';
-  const r = current;
-  $('dName').textContent = r.nombre;
-  $('dData').innerHTML = [
-    ['Código', r.codigo], ['Enviada', fmtDate(r.creado)], ['Cédula / pasaporte', r.cedula], ['Nacimiento', r.nacimiento],
-    ['Sexo', r.sexo], ['Distancia', `${r.distancia} ($${PRICES[r.distancia] || '—'})`], ['Categoría', r.categoria],
-    ['Talla', r.talla], ['Celular', r.celular], ['Correo', r.correo], ['Ciudad / club', r.club || '—'],
-    ['Tipo de sangre', r.sangre || '—'], ['Emergencia', r.emergencia]
-  ].map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
-  renderReview();
-
-  const box = $('dReceipt');
-  box.innerHTML = '<p>Cargando comprobante…</p>';
+async function showPhoto(r) {
+  $('photoTitle').textContent = `Comprobante · ${r.nombre}`;
+  $('photoInfo').textContent = `${r.codigo} · ${r.distancia} ($${PRICES[r.distancia] || '—'}) · enviado ${fmtDate(r.creado)}`;
+  $('photoBox').innerHTML = '<p class="muted">Cargando…</p>';
+  openModal('photoModal');
   try {
-    const snap = await fs.getDoc(fs.doc(db, 'comprobantes', id));
-    if (current?.id !== id) return;
+    const snap = await fs.getDoc(fs.doc(db, 'comprobantes', r.id));
     const src = snap.exists() ? snap.data().imagen : '';
-    box.innerHTML = src && src.startsWith('data:image/') ? '<img alt="Comprobante de pago" />' : '<p>No hay imagen del comprobante.</p>';
-    const img = box.querySelector('img');
-    if (img) {
-      img.src = src;
-      img.addEventListener('click', () => {
-        const w = window.open();
-        if (w) w.document.write(`<title>Comprobante ${esc(r.codigo)}</title><body style="margin:0;background:#111"><img src="${src}" style="max-width:100%;display:block;margin:auto">`);
-      });
-    }
-  } catch (e) {
-    box.innerHTML = `<p>No se pudo cargar el comprobante (${esc(e.code || e.message)}).</p>`;
+    if (!src || !src.startsWith('data:image/')) { $('photoBox').innerHTML = '<p class="muted">No hay imagen del comprobante.</p>'; return; }
+    $('photoBox').innerHTML = '<img alt="Comprobante de pago" /><p class="muted">Clic en la imagen para verla en tamaño completo.</p>';
+    const img = $('photoBox').querySelector('img');
+    img.src = src;
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', () => {
+      const w = window.open();
+      if (w) w.document.write(`<title>Comprobante ${esc(r.codigo)}</title><body style="margin:0;background:#111"><img src="${src}" style="max-width:100%;display:block;margin:auto">`);
+    });
+  } catch (err) {
+    $('photoBox').innerHTML = `<p class="muted">No se pudo cargar el comprobante (${esc(err.code || err.message)}).</p>`;
   }
 }
 
-function closeDetail() {
-  $('detail').hidden = true;
-  document.body.style.overflow = '';
-  current = null;
-}
-$('dClose').addEventListener('click', closeDetail);
-$('detail').addEventListener('click', (e) => { if (e.target === $('detail')) closeDetail(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('detail').hidden) closeDetail(); });
-
-function renderReview() {
-  const r = current;
-  const st = $('dState');
-  st.className = 'pill ' + r.estado;
-  st.textContent = label(r.estado);
-  const reviewed = r.revisadoPor ? `<p class="hint">${label(r.estado)} por ${esc(r.revisadoPor)} · ${esc(fmtDate(r.revisadoEn))}</p>` : '';
-
-  if (r.estado === 'pendiente') {
-    $('dReview').innerHTML = `
-      <p>Verifica que el comprobante corresponda al valor de <b>${esc(r.distancia)} ($${PRICES[r.distancia] || '—'})</b>.</p>
-      <div class="actions">
-        <button class="btn btn--ok" data-act="aprobar">✓ Aprobar inscripción</button>
-        <button class="btn btn--no" data-act="mostrar-rechazo">✕ Rechazar</button>
-      </div>
-      <div id="rejectBox" hidden style="margin-top:12px">
-        <label class="hint" for="motivo">Motivo del rechazo (se incluye en el mensaje al participante)</label>
-        <textarea id="motivo" placeholder="Ej.: el monto no corresponde a la distancia, comprobante ilegible…"></textarea>
-        <div class="actions"><button class="btn btn--no" data-act="rechazar">Confirmar rechazo</button></div>
-      </div>
-      <div class="actions" style="margin-top:18px"><button class="btn btn--ghost btn--sm" data-act="eliminar">Eliminar (pruebas o envíos duplicados)</button></div>`;
-    return;
-  }
-
+function showNotify(r) {
   const ok = r.estado === 'aprobada';
-  const wa = ok ? MSG.aprobadaWhatsapp(r) : MSG.rechazadaWhatsapp(r);
-  const mail = gmailLink(r, ok ? MSG.aprobadaAsunto(r) : MSG.rechazadaAsunto(r), ok ? MSG.aprobadaCorreo(r) : MSG.rechazadaCorreo(r), user.email);
-  $('dReview').innerHTML = `
-    ${reviewed}
-    ${!ok && r.motivo ? `<p><b>Motivo:</b> ${esc(r.motivo)}</p>` : ''}
-    <div class="notify ${ok ? '' : 'no'}">
-      <p><b>${ok ? 'Envía la confirmación al participante:' : 'Avisa al participante del rechazo:'}</b></p>
-      <div class="actions">
-        <a class="btn btn--wa" href="${esc(waLink(r, wa))}" target="_blank" rel="noopener" data-act="sent-wa">WhatsApp ${r.notificadoWhatsapp ? '✓ enviado' : ''}</a>
-        <a class="btn btn--mail" href="${esc(mail)}" target="_blank" rel="noopener" data-act="sent-mail">Correo (Gmail) ${r.notificadoCorreo ? '✓ enviado' : ''}</a>
-      </div>
-      <p class="hint" style="margin-top:8px">Se abre el chat o el correo con el mensaje listo; solo pulsa <b>Enviar</b>. WhatsApp: ${esc(waNumber(r.celular))} · Correo: ${esc(r.correo)}</p>
-    </div>
-    <div class="actions" style="margin-top:14px">
-      <button class="btn btn--ghost btn--sm" data-act="pendiente">Volver a pendiente</button>
-      <button class="btn btn--ghost btn--sm" data-act="eliminar">Eliminar</button>
-    </div>`;
+  $('notifyTitle').textContent = ok ? 'Inscripción aprobada' : 'Inscripción negada';
+  $('notifyWho').innerHTML = `Envía ${ok ? 'la confirmación' : 'el aviso'} a <b>${esc(r.nombre)}</b> · WhatsApp ${esc(waNumber(r.celular))} · ${esc(r.correo)}`;
+  $('notifyWa').href = waLink(r);
+  $('notifyMail').href = gmailLink(r);
+  $('notifyWa').dataset.id = r.id;
+  $('notifyMail').dataset.id = r.id;
+  openModal('notifyModal');
 }
+
+function markSent(id, field) {
+  fs.updateDoc(fs.doc(db, 'inscripciones', id), { [field]: fs.serverTimestamp() }).catch(() => {});
+}
+$('notifyWa').addEventListener('click', () => markSent($('notifyWa').dataset.id, 'notificadoWhatsapp'));
+$('notifyMail').addEventListener('click', () => markSent($('notifyMail').dataset.id, 'notificadoCorreo'));
 
 // Mantiene al día la consulta pública /verificar (solo si ese registro pertenece a esta inscripción)
 async function syncVerification(batch, r, estado) {
   const vref = fs.doc(db, 'verificacion', r.cedulaKey || cedulaKey(r.cedula));
   const v = await fs.getDoc(vref);
-  const mine = !v.exists() || v.data().ref === r.id;
-  if (!mine) return;
+  if (v.exists() && v.data().ref !== r.id) return;
   if (estado === null) { if (v.exists()) batch.delete(vref); return; }
   batch.set(vref, { ref: r.id, codigo: r.codigo, nombre: shortName(r.nombre), distancia: r.distancia, estado, actualizado: fs.serverTimestamp() });
 }
 
-$('dReview').addEventListener('click', async (e) => {
-  const el = e.target.closest('[data-act]');
-  if (!el || !current) return;
-  const act = el.dataset.act;
-  const ref = fs.doc(db, 'inscripciones', current.id);
+async function setEstado(r, estado, extra = {}) {
+  const batch = fs.writeBatch(db);
+  batch.update(fs.doc(db, 'inscripciones', r.id), { estado, revisadoPor: user.email, revisadoEn: fs.serverTimestamp(),
+    notificadoWhatsapp: fs.deleteField(), notificadoCorreo: fs.deleteField(), ...extra });
+  await syncVerification(batch, r, estado);
+  await batch.commit();
+}
 
-  if (act === 'mostrar-rechazo') { $('rejectBox').hidden = false; $('motivo').focus(); return; }
-  if (act === 'sent-wa' || act === 'sent-mail') {
-    // El enlace se abre normalmente; solo registramos el aviso
-    fs.updateDoc(ref, { [act === 'sent-wa' ? 'notificadoWhatsapp' : 'notificadoCorreo']: fs.serverTimestamp() }).catch(() => {});
+/* ---------- Acciones de la tabla ---------- */
+let denyTarget = null;
+
+$('rows').addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-act]');
+  const tr = e.target.closest('tr[data-id]');
+  if (!el || !tr || el.disabled) return;
+  const r = rows.find((x) => x.id === tr.dataset.id);
+  if (!r) return;
+  const act = el.dataset.act;
+
+  if (act === 'foto') return showPhoto(r);
+  if (act === 'wa') { markSent(r.id, 'notificadoWhatsapp'); window.open(waLink(r), '_blank', 'noopener'); return; }
+  if (act === 'mail') { markSent(r.id, 'notificadoCorreo'); window.open(gmailLink(r), '_blank', 'noopener'); return; }
+  if (act === 'negar') {
+    denyTarget = r;
+    $('denyWho').innerHTML = `<b>${esc(r.nombre)}</b> · ${esc(r.cedula)} · ${esc(r.distancia)}`;
+    $('motivo').value = '';
+    openModal('denyModal');
+    $('motivo').focus();
     return;
   }
 
   el.disabled = true;
   try {
-    const batch = fs.writeBatch(db);
     if (act === 'aprobar') {
-      batch.update(ref, { estado: 'aprobada', revisadoPor: user.email, revisadoEn: fs.serverTimestamp(), motivo: fs.deleteField() });
-      await syncVerification(batch, current, 'aprobada');
-      await batch.commit();
-      toast('Inscripción aprobada. Envía la confirmación por WhatsApp y correo.');
-    } else if (act === 'rechazar') {
-      const motivo = $('motivo').value.trim();
-      if (!motivo) { $('motivo').focus(); el.disabled = false; return; }
-      batch.update(ref, { estado: 'rechazada', motivo: motivo.slice(0, 300), revisadoPor: user.email, revisadoEn: fs.serverTimestamp() });
-      await syncVerification(batch, current, 'rechazada');
-      await batch.commit();
-      toast('Inscripción rechazada. Avisa al participante.');
+      await setEstado(r, 'aprobada', { motivo: fs.deleteField() });
+      showNotify({ ...r, estado: 'aprobada' });
     } else if (act === 'eliminar') {
-      if (!confirm(`¿Eliminar definitivamente la inscripción ${current.codigo} de ${current.nombre}? No se puede deshacer.`)) { el.disabled = false; return; }
-      batch.delete(ref);
-      batch.delete(fs.doc(db, 'comprobantes', current.id));
-      await syncVerification(batch, current, null);
+      if (!confirm(`¿Eliminar definitivamente la inscripción de ${r.nombre} (${r.cedula})? No se puede deshacer.`)) { el.disabled = false; return; }
+      const batch = fs.writeBatch(db);
+      batch.delete(fs.doc(db, 'inscripciones', r.id));
+      batch.delete(fs.doc(db, 'comprobantes', r.id));
+      await syncVerification(batch, r, null);
       await batch.commit();
-      closeDetail();
       toast('Inscripción eliminada.');
-    } else if (act === 'pendiente') {
-      batch.update(ref, { estado: 'pendiente', revisadoPor: fs.deleteField(), revisadoEn: fs.deleteField(), motivo: fs.deleteField(),
-        notificadoWhatsapp: fs.deleteField(), notificadoCorreo: fs.deleteField() });
-      await syncVerification(batch, current, 'pendiente');
-      await batch.commit();
-      toast('La inscripción volvió a pendiente.');
     }
   } catch (err) {
     toast('No se pudo guardar el cambio: ' + (err.code || err.message));
@@ -385,19 +348,37 @@ $('dReview').addEventListener('click', async (e) => {
   }
 });
 
-/* ---------- Exportar ---------- */
+$('denyConfirm').addEventListener('click', async () => {
+  const r = denyTarget;
+  const motivo = $('motivo').value.trim();
+  if (!r) return;
+  if (!motivo) { $('motivo').focus(); return; }
+  $('denyConfirm').disabled = true;
+  try {
+    await setEstado(r, 'rechazada', { motivo: motivo.slice(0, 300) });
+    closeModals();
+    showNotify({ ...r, estado: 'rechazada', motivo });
+  } catch (err) {
+    toast('No se pudo guardar el cambio: ' + (err.code || err.message));
+  } finally {
+    $('denyConfirm').disabled = false;
+  }
+});
+
+/* ---------- Reporte ---------- */
 $('exportCsv').addEventListener('click', () => {
-  const cols = [['codigo', 'Código'], ['estado', 'Estado'], ['nombre', 'Nombres y apellidos'], ['cedula', 'Cédula / pasaporte'],
-    ['nacimiento', 'Fecha de nacimiento'], ['sexo', 'Sexo'], ['distancia', 'Distancia'], ['categoria', 'Categoría'], ['talla', 'Talla'],
-    ['celular', 'Celular'], ['correo', 'Correo'], ['club', 'Ciudad / club'], ['sangre', 'Tipo de sangre'], ['emergencia', 'Contacto de emergencia'],
-    ['motivo', 'Motivo de rechazo'], ['revisadoPor', 'Revisado por']];
+  const cols = [['N°', (r) => order[r.id]], ['Estado', (r) => LABEL[r.estado]], ['Código', (r) => r.codigo], ['Nombres', (r) => r.nombre],
+    ['Cédula', (r) => r.cedula], ['F. Nac.', (r) => r.nacimiento], ['Distancia', (r) => r.distancia], ['Categoría', (r) => catOnly(r.categoria)],
+    ['Sexo', (r) => SEXO[r.sexo] || r.sexo], ['Teléfono', (r) => r.celular], ['Email', (r) => r.correo], ['Club/Provincia', (r) => r.club],
+    ['Talla', (r) => r.talla], ['Tipo de sangre', (r) => r.sangre], ['Contacto de emergencia', (r) => r.emergencia],
+    ['Motivo negado', (r) => r.motivo], ['Fecha de envío', (r) => fmtDate(r.creado)]];
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const lines = [cols.map((c) => cell(c[1])).concat(cell('Fecha de envío')).join(';')]
-    .concat(visibleRows().map((r) => cols.map((c) => cell(r[c[0]])).concat(cell(fmtDate(r.creado))).join(';')));
+  const list = visibleRows().slice().reverse();
+  const lines = [cols.map((c) => cell(c[0])).join(';')].concat(list.map((r) => cols.map((c) => cell(c[1](r))).join(';')));
   const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `inscripciones-piatua-${filter}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `reporte-inscripciones-piatua-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
 });

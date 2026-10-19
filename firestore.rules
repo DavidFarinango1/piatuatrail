@@ -30,8 +30,20 @@ service cloud.firestore {
         && d.creado == request.time;
     }
 
+    // Interruptor "Cerrar inscripciones" del panel. Si el documento no existe, están abiertas.
+    function registrationOpen() {
+      return !exists(/databases/$(database)/documents/config/inscripciones)
+        || get(/databases/$(database)/documents/config/inscripciones).data.abiertas == true;
+    }
+
+    match /config/{doc} {
+      allow get: if true;
+      allow write: if isAdmin();
+    }
+
     match /inscripciones/{id} {
-      allow create: if validRegistration(request.resource.data)
+      allow create: if registrationOpen()
+        && validRegistration(request.resource.data)
         && existsAfter(/databases/$(database)/documents/comprobantes/$(id));
       allow read, update, delete: if isAdmin();
     }

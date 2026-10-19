@@ -262,6 +262,11 @@
       done.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (err) {
       var m = (err && err.message) || '';
+      if (err && err.code === 'permission-denied') {
+        fetch(CONFIG_URL).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.fields && d.fields.abiertas && d.fields.abiertas.booleanValue === false) showClosed();
+        }).catch(function () {});
+      }
       errorBox.textContent = m.indexOf('DUP:') === 0 ? m.slice(4)
         : m.indexOf('comprobante') > -1 ? m
         : 'No se pudo enviar la inscripción. Revisa tu conexión e inténtalo de nuevo. Si persiste, escríbenos al WhatsApp +593 99 157 0800.';
@@ -271,6 +276,23 @@
       submitBtn.textContent = 'Enviar inscripción';
     }
   });
+
+  /* ---------- Inscripciones abiertas o cerradas (interruptor del panel) ---------- */
+  var CONFIG_URL = 'https://firestore.googleapis.com/v1/projects/piatuatrail-web/databases/(default)/documents/config/inscripciones?key=AIzaSyDN7fenIJQ5jtyLXkw0O1sBpyaZ8GnkXnQ';
+  function showClosed() {
+    if (document.getElementById('regClosed')) return;
+    var box = document.createElement('div');
+    box.className = 'form form--done is-in';
+    box.id = 'regClosed';
+    box.innerHTML = '<h3>Inscripciones cerradas</h3><p>El formulario de inscripción ya no recibe nuevas inscripciones.</p>' +
+      '<p>Si ya te inscribiste, consulta tu estado en <a href="verificar.html"><b>Verificar</b></a>. Para cualquier consulta escríbenos al ' +
+      '<a href="https://wa.me/593991570800" target="_blank" rel="noopener">WhatsApp +593 99 157 0800</a>.</p>';
+    form.hidden = true;
+    form.parentNode.insertBefore(box, form);
+  }
+  fetch(CONFIG_URL).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (d && d.fields && d.fields.abiertas && d.fields.abiertas.booleanValue === false) showClosed();
+  }).catch(function () {});
 
   document.getElementById('regAnother').addEventListener('click', function () {
     form.reset();
