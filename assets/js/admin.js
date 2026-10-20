@@ -23,6 +23,7 @@ const ICON = {
 };
 
 /* ---------- Estado ---------- */
+const openPhotos = new Set(), photoCache = {};
 let user, rows = [], order = {}, unsubscribe = null, unsubConfig = null, abiertas = true;
 
 /* ---------- Acceso ---------- */
@@ -136,7 +137,7 @@ function render() {
       <td class="mail">${esc(r.correo)}</td>
       <td class="club">${esc(r.club)}</td>
       <td>${esc(r.talla)}</td>
-      <td><button class="btn sm btn--orange" data-act="foto">Ver foto</button></td>
+      <td><button class="btn sm btn--orange" data-act="foto">${openPhotos.has(r.id) ? 'Ocultar' : 'Ver foto'}</button></td>
       <td>
         <div class="acts">
           <button class="btn sm approve" data-act="aprobar" ${r.estado === 'aprobada' ? 'disabled' : ''}>Aprobar</button>
@@ -144,34 +145,46 @@ function render() {
           <button class="icon" data-act="eliminar" title="Eliminar">${ICON.trash}</button>
         </div>
       </td>
-    </tr>`;
+    </tr>${openPhotos.has(r.id) ? photoRow(r) : ''}`;
   }).join('');
 }
 
 ['search', 'fEstado', 'fDist', 'fCat', 'fSexo'].forEach((id) => $(id).addEventListener(id === 'search' ? 'input' : 'change', render));
 
-/* ---------- Ventanas ---------- */
-const openModal = (id) => { $(id).hidden = false; document.body.style.overflow = 'hidden'; };
-const closeModals = () => { document.querySelectorAll('.modal, .lightbox').forEach((m) => { m.hidden = true; }); document.body.style.overflow = ''; };
-document.querySelectorAll('.modal, .lightbox').forEach((m) => m.addEventListener('click', (e) => {
-  if (e.target === m || e.target.classList.contains('lightbox__stage') || e.target.closest('[data-close]')) closeModals();
-}));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
+function photoRow(r) {
+  const src = photoCache[r.id];
+  const body = src === undefined ? '<p>Cargando comprobante…</p>'
+    : src ? `<img src="${src}" alt="Comprobante de pago de ${esc(r.nombre)}" />` : '<p>No hay imagen del comprobante.</p>';
+  return `<tr class="photo-row" data-id="${esc(r.id)}"><td colspan="14">
+    <div class="photo-head">
+      <h3>Comprobante de pago de ${esc(r.nombre)}</h3>
+      ${src ? '<button class="btn btn--chip" data-act="tab">Abrir en pestaña</button>' : ''}
+      <button class="btn btn--chip" data-act="foto">Cerrar ✕</button>
+    </div>
+    <div class="photo-frame">${body}</div>
+  </td></tr>`;
+}
 
-async function showPhoto(r) {
-  $('photoTitle').textContent = `Comprobante · ${r.nombre}`;
-  $('photoInfo').textContent = `${r.codigo} · ${r.distancia} ($${PRICES[r.distancia] || '—'}) · enviado ${fmtDate(r.creado)}`;
-  $('photoBox').innerHTML = '<p>Cargando…</p>';
-  openModal('photoModal');
+async function togglePhoto(r) {
+  if (openPhotos.has(r.id)) { openPhotos.delete(r.id); render(); return; }
+  openPhotos.add(r.id);
+  render();
+  if (photoCache[r.id] !== undefined) return;
   try {
     const snap = await fs.getDoc(fs.doc(db, 'comprobantes', r.id));
     const src = snap.exists() ? snap.data().imagen : '';
-    if (!src || !src.startsWith('data:image/')) { $('photoBox').innerHTML = '<p>No hay imagen del comprobante.</p>'; return; }
-    $('photoBox').innerHTML = '<img alt="Comprobante de pago" />';
-    $('photoBox').querySelector('img').src = src;
+    photoCache[r.id] = src && src.startsWith('data:image/') ? src : '';
   } catch (err) {
-    $('photoBox').innerHTML = `<p>No se pudo cargar el comprobante (${esc(err.code || err.message)}).</p>`;
+    photoCache[r.id] = '';
+    toast('No se pudo cargar el comprobante: ' + (err.code || err.message));
   }
+  render();
+}
+
+// Abre la imagen en una pestaña nueva (como archivo, porque los navegadores bloquean abrir data: directamente)
+async function openInTab(r) {
+  const blob = await (await fetch(photoCache[r.id])).blob();
+  window.open(URL.createObjectURL(blob), '_blank');
 }
 
 // Mantiene al día la consulta pública /verificar (solo si ese registro pertenece a esta inscripción)
@@ -201,7 +214,8 @@ $('rows').addEventListener('click', async (e) => {
   if (!r) return;
   const act = el.dataset.act;
 
-  if (act === 'foto') return showPhoto(r);
+  if (act === 'foto') return togglePhoto(r);
+  if (act === 'tab') return openInTab(r);
   el.disabled = true;
   try {
     if (act === 'aprobar') {
@@ -217,6 +231,8 @@ $('rows').addEventListener('click', async (e) => {
       batch.delete(fs.doc(db, 'comprobantes', r.id));
       await syncVerification(batch, r, null);
       await batch.commit();
+      openPhotos.delete(r.id);
+      delete photoCache[r.id];
       toast('Inscripción eliminada.');
     }
   } catch (err) {

@@ -84,17 +84,15 @@
     .dialog h2 { font-size: 1.8rem; margin-bottom: 6px; padding-right: 40px; }
     .dialog p { margin: .4rem 0; }
     .dialog .close { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--pink); font-size: 1.1rem; }
-    /* Visor del comprobante: pantalla completa, imagen entera ajustada */
-    .lightbox { position: fixed; inset: 0; z-index: 70; background: rgba(12, 6, 8, .92); display: flex; flex-direction: column; }
-    .lightbox__bar { display: flex; align-items: center; gap: 16px; padding: 14px 20px; color: #fff; }
-    .lightbox__bar div { margin-right: auto; display: flex; flex-direction: column; }
-    .lightbox__bar b { font-size: 1.05rem; }
-    .lightbox__bar span { font-size: .85rem; opacity: .75; }
-    .lightbox__close { width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; font-size: 1.2rem; }
-    .lightbox__close:hover { background: rgba(255,255,255,.28); }
-    .lightbox__stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 20px 24px; overflow: hidden; color: #fff; }
-    .lightbox__stage img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
-    .lightbox__stage p { opacity: .8; }
+    /* Comprobante desplegado bajo la fila (como Baños Run) */
+    tr.photo-row > td { background: #f6e9ec; padding: 14px 10px 18px; }
+    .photo-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .photo-head h3 { margin: 0 auto 0 0; font: 600 1.05rem 'Inter', sans-serif; color: #5a2f38; }
+    .btn--chip { background: var(--pink); color: var(--ink); padding: .45rem .9rem; border-radius: 10px; font-size: .95rem; }
+    .btn--chip:hover { background: #e3c9cf; }
+    .photo-frame { display: flex; justify-content: center; }
+    .photo-frame img { display: block; max-width: min(100%, 520px); max-height: 640px; width: auto; height: auto; background: #fff; border: 1px solid #e3cfd4; border-radius: 10px; }
+    .photo-frame p { color: var(--muted); }
     .muted { color: var(--muted); font-size: .88rem; }
     .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-weight: 600; }
     @media (max-width: 700px) { .wrap { padding: 20px 12px 50px; } .top h1 { font-size: 2.1rem; } .filters select { flex: 1 1 45%; min-width: 0; } }
@@ -163,13 +161,6 @@
   </div>
 
   <!-- Ventana: foto del comprobante -->
-  <div class="lightbox" id="photoModal" hidden role="dialog" aria-modal="true" aria-labelledby="photoTitle">
-    <header class="lightbox__bar">
-      <div><b id="photoTitle">Comprobante</b><span id="photoInfo"></span></div>
-      <button class="lightbox__close" data-close aria-label="Cerrar">✕</button>
-    </header>
-    <div class="lightbox__stage" id="photoBox"><p>Cargando…</p></div>
-  </div>
 
   <div class="toast" id="toast" hidden></div>
 
