@@ -152,25 +152,25 @@ function render() {
 
 /* ---------- Ventanas ---------- */
 const openModal = (id) => { $(id).hidden = false; document.body.style.overflow = 'hidden'; };
-const closeModals = () => { document.querySelectorAll('.modal').forEach((m) => { m.hidden = true; }); document.body.style.overflow = ''; };
-document.querySelectorAll('.modal').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close]')) closeModals(); }));
+const closeModals = () => { document.querySelectorAll('.modal, .lightbox').forEach((m) => { m.hidden = true; }); document.body.style.overflow = ''; };
+document.querySelectorAll('.modal, .lightbox').forEach((m) => m.addEventListener('click', (e) => {
+  if (e.target === m || e.target.classList.contains('lightbox__stage') || e.target.closest('[data-close]')) closeModals();
+}));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
 
 async function showPhoto(r) {
   $('photoTitle').textContent = `Comprobante · ${r.nombre}`;
   $('photoInfo').textContent = `${r.codigo} · ${r.distancia} ($${PRICES[r.distancia] || '—'}) · enviado ${fmtDate(r.creado)}`;
-  $('photoBox').innerHTML = '<p class="muted">Cargando…</p>';
+  $('photoBox').innerHTML = '<p>Cargando…</p>';
   openModal('photoModal');
   try {
     const snap = await fs.getDoc(fs.doc(db, 'comprobantes', r.id));
     const src = snap.exists() ? snap.data().imagen : '';
-    if (!src || !src.startsWith('data:image/')) { $('photoBox').innerHTML = '<p class="muted">No hay imagen del comprobante.</p>'; return; }
-    $('photoBox').innerHTML = '<div class="viewer"><img alt="Comprobante de pago" /></div><p class="muted">Clic en la imagen para acercar o alejar.</p>';
-    const viewer = $('photoBox').querySelector('.viewer');
-    viewer.querySelector('img').src = src;
-    viewer.addEventListener('click', () => viewer.classList.toggle('zoom'));
+    if (!src || !src.startsWith('data:image/')) { $('photoBox').innerHTML = '<p>No hay imagen del comprobante.</p>'; return; }
+    $('photoBox').innerHTML = '<img alt="Comprobante de pago" />';
+    $('photoBox').querySelector('img').src = src;
   } catch (err) {
-    $('photoBox').innerHTML = `<p class="muted">No se pudo cargar el comprobante (${esc(err.code || err.message)}).</p>`;
+    $('photoBox').innerHTML = `<p>No se pudo cargar el comprobante (${esc(err.code || err.message)}).</p>`;
   }
 }
 
