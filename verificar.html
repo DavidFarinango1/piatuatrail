@@ -126,10 +126,10 @@
             <p>¡Nos vemos el sábado 14 de noviembre! Revisa la <a class="link" href="guia.html">Guía del Corredor</a> para la entrega de kits y horarios.</p>`);
         } else if (d.estado === 'rechazada') {
           show('rechazada', `<h2>Inscripción no validada</h2>${details(d)}
-            <p>No pudimos validar tu comprobante. Revisa el mensaje que te enviamos por WhatsApp o correo, o <a class="link" href="https://wa.me/593991570800" target="_blank" rel="noopener">escríbenos</a>. Puedes volver a <a class="link" href="index.html#inscripcion">enviar la ficha</a>.</p>`);
+            <p>No pudimos validar tu comprobante. <a class="link" href="https://wa.me/593991570800" target="_blank" rel="noopener">Escríbenos por WhatsApp</a> para ayudarte. Puedes volver a <a class="link" href="index.html#inscripcion">enviar la ficha</a>.</p>`);
         } else {
           show('pendiente', `<h2>En revisión</h2>${details(d)}
-            <p>Recibimos tu ficha y la organización está validando tu comprobante. Te confirmaremos por WhatsApp y correo.</p>`);
+            <p>Recibimos tu ficha y la organización está validando tu comprobante. Vuelve a consultar más tarde.</p>`);
         }
       } catch (err) {
         show('nada', '<p>No se pudo consultar en este momento. Revisa tu conexión e inténtalo de nuevo.</p>');

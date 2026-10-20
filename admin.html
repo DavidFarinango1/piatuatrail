@@ -74,10 +74,8 @@
     .acts .deny { background: var(--no); color: #fff; }
     .acts .approve[disabled] { background: #a9dfbb; }
     .acts .deny[disabled] { background: #f2a49e; }
-    .icons { display: flex; gap: 6px; }
+
     .icon { width: 34px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: var(--pink); color: #5a2f38; }
-    .icon.sent { background: #c9f2d6; color: #0b7a34; }
-    .icon[disabled] { opacity: .35; cursor: default; }
     .empty { padding: 40px; text-align: center; color: var(--muted); }
 
     /* Ventanas */
@@ -87,11 +85,9 @@
     .dialog h2 { font-size: 1.8rem; margin-bottom: 6px; padding-right: 40px; }
     .dialog p { margin: .4rem 0; }
     .dialog .close { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--pink); font-size: 1.1rem; }
-    .dialog img { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--line); margin-top: 10px; }
-    .dialog textarea { width: 100%; min-height: 90px; padding: .7rem; border: 1px solid var(--field); border-radius: 10px; margin-top: 8px; }
-    .dialog .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-    .btn--wa { background: #25d366; color: #06301a; padding: .75rem 1.2rem; }
-    .btn--mail { background: #fff; color: #c5221f; border: 2px solid #c5221f; padding: .65rem 1.1rem; }
+    .viewer { margin-top: 10px; max-height: 72vh; overflow: auto; border-radius: 10px; border: 1px solid var(--line); background: #f3eeef; }
+    .viewer img { display: block; width: 100%; height: auto; cursor: zoom-in; }
+    .viewer.zoom img { width: 200%; max-width: none; cursor: zoom-out; }
     .muted { color: var(--muted); font-size: .88rem; }
     .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-weight: 600; }
     @media (max-width: 700px) { .wrap { padding: 20px 12px 50px; } .top h1 { font-size: 2.1rem; } .filters select { flex: 1 1 45%; min-width: 0; } }
@@ -166,32 +162,6 @@
       <h2 id="photoTitle">Comprobante</h2>
       <p class="muted" id="photoInfo"></p>
       <div id="photoBox"><p class="muted">Cargando…</p></div>
-    </div>
-  </div>
-
-  <!-- Ventana: negar -->
-  <div class="modal" id="denyModal" hidden>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="denyTitle">
-      <button class="close" data-close aria-label="Cerrar">✕</button>
-      <h2 id="denyTitle">Negar inscripción</h2>
-      <p id="denyWho"></p>
-      <label class="muted" for="motivo">Motivo (se incluye en el mensaje al participante)</label>
-      <textarea id="motivo" placeholder="Ej.: el monto no corresponde a la distancia, comprobante ilegible…"></textarea>
-      <div class="row"><button class="btn btn--red" id="denyConfirm">Negar inscripción</button></div>
-    </div>
-  </div>
-
-  <!-- Ventana: avisar al participante -->
-  <div class="modal" id="notifyModal" hidden>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="notifyTitle">
-      <button class="close" data-close aria-label="Cerrar">✕</button>
-      <h2 id="notifyTitle"></h2>
-      <p id="notifyWho"></p>
-      <div class="row">
-        <a class="btn btn--wa" id="notifyWa" target="_blank" rel="noopener">WhatsApp</a>
-        <a class="btn btn--mail" id="notifyMail" target="_blank" rel="noopener">Correo (Gmail)</a>
-      </div>
-      <p class="muted" style="margin-top:12px">Se abre el chat o el correo con el mensaje listo; solo pulsa <b>Enviar</b>.</p>
     </div>
   </div>
 

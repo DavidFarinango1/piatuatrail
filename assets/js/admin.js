@@ -2,76 +2,6 @@ import { loadAuth, ADMINS, cedulaKey, shortName } from './firebase.js';
 
 const PRICES = { '14K Jaguar': 25, '7K Armadillo': 20 };
 
-/* ---------- Mensajes (editables) ---------- */
-const MSG = {
-  aprobadaWhatsapp: () => `¡Hola, Trail Runner! 🏃‍♂️⛰️ ¡Tu inscripción al Piatúa Ñampy Trail Running está 100% confirmada! Nos vemos este 14 de noviembre de 2026 en el Balneario del Río Piatúa (Santa Clara, Pastaza).
-
-Entrega de kits:
-
-Viernes 13 de noviembre, en el GAD Municipal de Santa Clara de 13h00 a 18h00.
-
-Sábado 14 de noviembre (mismo día del evento), de 06h00 a 08h00 (exclusivo para personas de fuera de la provincia).
-
-Concentración: 07h00
-
-Salida 14K: 09h00
-
-Salida 7K: 09h20
-
-Por favor, revisa todos los detalles, cronograma y recomendaciones en la Guía del Corredor ingresando a www.piatuatrail.com. ¡Prepárate para vivir la magia de la Amazonía! 🌿`,
-
-  aprobadaAsunto: () => '¡Inscripción confirmada! - Piatúa Ñampy Trail Running 2026',
-  aprobadaCorreo: () => `¡Hola, Trail Runner!
-
-Nos alegra confirmar tu participación oficial en la primera edición del Piatúa Ñampy Trail Running, que se llevará a cabo el 14 de noviembre de 2026 en el cantón Santa Clara, provincia de Pastaza.
-
-Para que tengas una experiencia increíble y estés al tanto de toda la logística, toma en cuenta la siguiente información importante:
-
-1. Entrega de Kits:
-
-Viernes 13 de noviembre: En el GAD Municipal de Santa Clara, de 13h00 a 18h00.
-
-Sábado 14 de noviembre (Día del evento): De 06h00 a 08h00 (horario preferencial para participantes que viajan desde fuera de la provincia).
-
-2. Cronograma del Evento (Sábado 14 de noviembre):
-
-Concentración: 07h00
-
-Salida 14K: 09h00
-
-Salida 7K: 09h20
-
-Premiación: 12h00
-
-Te invitamos a revisar la Guía del Corredor completa, altimetrías y recomendaciones de seguridad visitando nuestra página oficial: www.piatuatrail.com.
-
-¡Nos vemos en la línea de partida para conquistar la ruta!
-
-Atentamente,
-
-Organización Kinesport Eventos`,
-
-  rechazadaWhatsapp: (r) => `Hola, ${r.nombre}. Revisamos tu inscripción ${r.codigo} al Piatúa Ñampy Trail Running 2026 y no pudimos validarla.
-
-Motivo: ${r.motivo || 'comprobante de pago no válido'}.
-
-Por favor, responde a este mensaje para ayudarte a completar tu inscripción.
-
-Organización Kinesport Eventos`,
-  rechazadaAsunto: (r) => `Inscripción ${r.codigo} no validada - Piatúa Ñampy Trail Running 2026`,
-  rechazadaCorreo: (r) => `Hola, ${r.nombre}:
-
-Revisamos tu inscripción ${r.codigo} al Piatúa Ñampy Trail Running 2026 y no pudimos validarla.
-
-Motivo: ${r.motivo || 'comprobante de pago no válido'}.
-
-Para completar tu inscripción, responde a este correo o escríbenos al WhatsApp +593 99 157 0800 indicando tu código.
-
-Atentamente,
-
-Organización Kinesport Eventos`
-};
-
 /* ---------- Utilidades ---------- */
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -79,22 +9,6 @@ const fmtDate = (ts) => ts && ts.toDate ? ts.toDate().toLocaleString('es-EC', { 
 const LABEL = { pendiente: 'pendiente', aprobada: 'aprobado', rechazada: 'negado' };
 const SEXO = { Mujer: 'Damas', Hombre: 'Varones' };
 const catOnly = (c) => String(c || '').split(' · ')[0];
-
-// Celular ecuatoriano → formato internacional para wa.me (0991234567 → 593991234567)
-function waNumber(cel) {
-  let d = String(cel || '').replace(/\D/g, '');
-  if (d.startsWith('00')) d = d.slice(2);
-  if (d.startsWith('593')) return d;
-  if (d.length === 10 && d.startsWith('0')) return '593' + d.slice(1);
-  if (d.length === 9 && d.startsWith('9')) return '593' + d;
-  return d;
-}
-const waLink = (r) => `https://wa.me/${waNumber(r.celular)}?text=${encodeURIComponent(r.estado === 'aprobada' ? MSG.aprobadaWhatsapp(r) : MSG.rechazadaWhatsapp(r))}`;
-const gmailLink = (r) => {
-  const ok = r.estado === 'aprobada';
-  return `https://mail.google.com/mail/?view=cm&fs=1&authuser=${encodeURIComponent(user.email)}&to=${encodeURIComponent(r.correo)}` +
-    `&su=${encodeURIComponent(ok ? MSG.aprobadaAsunto(r) : MSG.rechazadaAsunto(r))}&body=${encodeURIComponent(ok ? MSG.aprobadaCorreo(r) : MSG.rechazadaCorreo(r))}`;
-};
 
 function toast(text) {
   const t = $('toast');
@@ -105,8 +19,6 @@ function toast(text) {
 }
 
 const ICON = {
-  wa: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.8-4.5-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
-  mail: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg>',
   trash: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7zm4 2v8h1.5v-8zm2.5 0v8H14v-8z"/></svg>'
 };
 
@@ -211,7 +123,6 @@ function render() {
   $('empty').hidden = list.length > 0;
   $('empty').textContent = rows.length ? 'No hay inscripciones con estos filtros.' : 'Todavía no hay inscripciones.';
   $('rows').innerHTML = list.map((r) => {
-    const done = r.estado !== 'pendiente';
     return `<tr data-id="${esc(r.id)}">
       <td>${order[r.id]}</td>
       <td><span class="pill ${esc(r.estado)}">${esc(LABEL[r.estado] || r.estado)}</span></td>
@@ -230,11 +141,7 @@ function render() {
         <div class="acts">
           <button class="btn sm approve" data-act="aprobar" ${r.estado === 'aprobada' ? 'disabled' : ''}>Aprobar</button>
           <button class="btn sm deny" data-act="negar" ${r.estado === 'rechazada' ? 'disabled' : ''}>Negar</button>
-          <div class="icons">
-            <button class="icon wa ${r.notificadoWhatsapp ? 'sent' : ''}" data-act="wa" ${done ? '' : 'disabled'} title="${done ? 'Enviar mensaje por WhatsApp' : 'Disponible al aprobar o negar'}">${ICON.wa}</button>
-            <button class="icon mail ${r.notificadoCorreo ? 'sent' : ''}" data-act="mail" ${done ? '' : 'disabled'} title="${done ? 'Enviar correo' : 'Disponible al aprobar o negar'}">${ICON.mail}</button>
-            <button class="icon" data-act="eliminar" title="Eliminar">${ICON.trash}</button>
-          </div>
+          <button class="icon" data-act="eliminar" title="Eliminar">${ICON.trash}</button>
         </div>
       </td>
     </tr>`;
@@ -258,35 +165,14 @@ async function showPhoto(r) {
     const snap = await fs.getDoc(fs.doc(db, 'comprobantes', r.id));
     const src = snap.exists() ? snap.data().imagen : '';
     if (!src || !src.startsWith('data:image/')) { $('photoBox').innerHTML = '<p class="muted">No hay imagen del comprobante.</p>'; return; }
-    $('photoBox').innerHTML = '<img alt="Comprobante de pago" /><p class="muted">Clic en la imagen para verla en tamaño completo.</p>';
-    const img = $('photoBox').querySelector('img');
-    img.src = src;
-    img.style.cursor = 'zoom-in';
-    img.addEventListener('click', () => {
-      const w = window.open();
-      if (w) w.document.write(`<title>Comprobante ${esc(r.codigo)}</title><body style="margin:0;background:#111"><img src="${src}" style="max-width:100%;display:block;margin:auto">`);
-    });
+    $('photoBox').innerHTML = '<div class="viewer"><img alt="Comprobante de pago" /></div><p class="muted">Clic en la imagen para acercar o alejar.</p>';
+    const viewer = $('photoBox').querySelector('.viewer');
+    viewer.querySelector('img').src = src;
+    viewer.addEventListener('click', () => viewer.classList.toggle('zoom'));
   } catch (err) {
     $('photoBox').innerHTML = `<p class="muted">No se pudo cargar el comprobante (${esc(err.code || err.message)}).</p>`;
   }
 }
-
-function showNotify(r) {
-  const ok = r.estado === 'aprobada';
-  $('notifyTitle').textContent = ok ? 'Inscripción aprobada' : 'Inscripción negada';
-  $('notifyWho').innerHTML = `Envía ${ok ? 'la confirmación' : 'el aviso'} a <b>${esc(r.nombre)}</b> · WhatsApp ${esc(waNumber(r.celular))} · ${esc(r.correo)}`;
-  $('notifyWa').href = waLink(r);
-  $('notifyMail').href = gmailLink(r);
-  $('notifyWa').dataset.id = r.id;
-  $('notifyMail').dataset.id = r.id;
-  openModal('notifyModal');
-}
-
-function markSent(id, field) {
-  fs.updateDoc(fs.doc(db, 'inscripciones', id), { [field]: fs.serverTimestamp() }).catch(() => {});
-}
-$('notifyWa').addEventListener('click', () => markSent($('notifyWa').dataset.id, 'notificadoWhatsapp'));
-$('notifyMail').addEventListener('click', () => markSent($('notifyMail').dataset.id, 'notificadoCorreo'));
 
 // Mantiene al día la consulta pública /verificar (solo si ese registro pertenece a esta inscripción)
 async function syncVerification(batch, r, estado) {
@@ -300,13 +186,12 @@ async function syncVerification(batch, r, estado) {
 async function setEstado(r, estado, extra = {}) {
   const batch = fs.writeBatch(db);
   batch.update(fs.doc(db, 'inscripciones', r.id), { estado, revisadoPor: user.email, revisadoEn: fs.serverTimestamp(),
-    notificadoWhatsapp: fs.deleteField(), notificadoCorreo: fs.deleteField(), ...extra });
+    ...extra });
   await syncVerification(batch, r, estado);
   await batch.commit();
 }
 
 /* ---------- Acciones de la tabla ---------- */
-let denyTarget = null;
 
 $('rows').addEventListener('click', async (e) => {
   const el = e.target.closest('[data-act]');
@@ -317,22 +202,14 @@ $('rows').addEventListener('click', async (e) => {
   const act = el.dataset.act;
 
   if (act === 'foto') return showPhoto(r);
-  if (act === 'wa') { markSent(r.id, 'notificadoWhatsapp'); window.open(waLink(r), '_blank', 'noopener'); return; }
-  if (act === 'mail') { markSent(r.id, 'notificadoCorreo'); window.open(gmailLink(r), '_blank', 'noopener'); return; }
-  if (act === 'negar') {
-    denyTarget = r;
-    $('denyWho').innerHTML = `<b>${esc(r.nombre)}</b> · ${esc(r.cedula)} · ${esc(r.distancia)}`;
-    $('motivo').value = '';
-    openModal('denyModal');
-    $('motivo').focus();
-    return;
-  }
-
   el.disabled = true;
   try {
     if (act === 'aprobar') {
-      await setEstado(r, 'aprobada', { motivo: fs.deleteField() });
-      showNotify({ ...r, estado: 'aprobada' });
+      await setEstado(r, 'aprobada');
+      toast(`Inscripción de ${r.nombre} aprobada.`);
+    } else if (act === 'negar') {
+      await setEstado(r, 'rechazada');
+      toast(`Inscripción de ${r.nombre} negada.`);
     } else if (act === 'eliminar') {
       if (!confirm(`¿Eliminar definitivamente la inscripción de ${r.nombre} (${r.cedula})? No se puede deshacer.`)) { el.disabled = false; return; }
       const batch = fs.writeBatch(db);
@@ -348,30 +225,13 @@ $('rows').addEventListener('click', async (e) => {
   }
 });
 
-$('denyConfirm').addEventListener('click', async () => {
-  const r = denyTarget;
-  const motivo = $('motivo').value.trim();
-  if (!r) return;
-  if (!motivo) { $('motivo').focus(); return; }
-  $('denyConfirm').disabled = true;
-  try {
-    await setEstado(r, 'rechazada', { motivo: motivo.slice(0, 300) });
-    closeModals();
-    showNotify({ ...r, estado: 'rechazada', motivo });
-  } catch (err) {
-    toast('No se pudo guardar el cambio: ' + (err.code || err.message));
-  } finally {
-    $('denyConfirm').disabled = false;
-  }
-});
-
 /* ---------- Reporte ---------- */
 $('exportCsv').addEventListener('click', () => {
   const cols = [['N°', (r) => order[r.id]], ['Estado', (r) => LABEL[r.estado]], ['Código', (r) => r.codigo], ['Nombres', (r) => r.nombre],
     ['Cédula', (r) => r.cedula], ['F. Nac.', (r) => r.nacimiento], ['Distancia', (r) => r.distancia], ['Categoría', (r) => catOnly(r.categoria)],
     ['Sexo', (r) => SEXO[r.sexo] || r.sexo], ['Teléfono', (r) => r.celular], ['Email', (r) => r.correo], ['Club/Provincia', (r) => r.club],
     ['Talla', (r) => r.talla], ['Tipo de sangre', (r) => r.sangre], ['Contacto de emergencia', (r) => r.emergencia],
-    ['Motivo negado', (r) => r.motivo], ['Fecha de envío', (r) => fmtDate(r.creado)]];
+['Fecha de envío', (r) => fmtDate(r.creado)]];
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const list = visibleRows().slice().reverse();
   const lines = [cols.map((c) => cell(c[0])).join(';')].concat(list.map((r) => cols.map((c) => cell(c[1](r))).join(';')));
